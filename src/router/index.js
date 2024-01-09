@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginComponent from '../components/LoginComponent.vue'
 import RegisterComponent from '../components/RegisterComponent.vue'
+import MyPostComponent from "../components/MyPostsComponent.vue"
+import PostDetailComponent from "../components/PostDetailComponent.vue"
 
 /**
  * Vue Router builder function.
@@ -29,7 +31,17 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: LoginComponent
-    }
+    },
+    {
+      path: '/my-posts',
+      name: 'my-posts',
+      component: MyPostComponent
+    },
+    {
+      path: '/post-detail/:id',
+      name: 'post-detail',
+      component: PostDetailComponent
+    },
   ]
 })
 

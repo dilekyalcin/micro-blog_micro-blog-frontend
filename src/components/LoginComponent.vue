@@ -77,6 +77,7 @@ export default {
                 .then(result => {
                     if (result.access_token) {
                         sessionStorage.setItem("token", result.access_token)
+                        sessionStorage.setItem("isLoggedIn", false)
                         this.$router.push("/")
                     } else {
                         this.isError = true
@@ -97,7 +98,7 @@ export default {
 .login-container {
     max-width: 800px;
     margin: 0 auto;
-    padding: 200px;
+    padding: 50px;
 }
 
 .login-content {

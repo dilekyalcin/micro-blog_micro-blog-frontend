@@ -1,21 +1,12 @@
 <template>
-    <div>
+    <div style="height: 100%;">
+        <update-post-modal v-if="showUpdateModal" :post="selectedPost" :handleUpdateCloseModal="handleUpdateCloseModal"
+            :getAllMyPosts="getAllMyPosts"></update-post-modal>
         <div class="container">
             <div class="modal-div">
                 <add-post-modal v-if="showModal" :handleCloseModal="handleCloseModal"
                     :getAllPosts="getAllPosts"></add-post-modal>
                 <button class="add-post-btn" @click="handleModal">Add Post</button>
-            </div>
-            <div class="filter-div">
-                <div class="datefilter">
-                    <label for="">Start Date</label>
-                    <input type="date" name="startDate" v-model="startDate">
-                </div>
-                <div class="datefilter">
-                    <label for="">End Date</label>
-                    <input type="date" name="enddate" v-model="endDate">
-                </div>
-                <button class="filter-btn" @click="filterPosts">Filter</button>
             </div>
             <div class="content">
                 <div v-if="isLoggedIn">
@@ -28,10 +19,13 @@
                         </div>
                         <div class="author-div">
                             <p>{{ item.author }}</p>
-                            <button class="detail-btn"><router-link :to="{ name: 'post-detail', params: { id: item.id } }"
-                                    style="text-decoration: none;color: white;">Detail</router-link></button>
+                            <button class="detail-btn">Detail</button>
                         </div>
-                        <hr/>
+                        <div class="card-footer">
+                            <button class="delete-btn" @click="deletePost(item.id)">Delete Post</button>
+                            <button class="update-btn" @click="updatePost(item)">Update Post</button>
+                        </div>
+                        <hr>
                     </div>
                 </div>
             </div>
@@ -40,34 +34,45 @@
 </template>
 
 <script>
-import { RouterLink } from 'vue-router';
 import AddPostModal from './AddPostModal.vue';
+import UpdatePostModal from "./UpdatePostModal.vue"
 export default {
     /**
-     * BlogPage - Component for displaying blog posts and creating new posts.
+     * MyPosts - Component for displaying the current user's blog posts and managing posts.
      *
-     * @name BlogPage
+     * @name MyPosts
      * @export
      */
-    name: "BlogPage",
+    name: "MyPosts",
     components: {
         AddPostModal,
-        RouterLink
+        UpdatePostModal
     },
+    /**
+    * Initial data for the MyPosts component.
+    *
+    * @typedef {Object} MyPostsData
+    * @property {Array|null} posts - Array of blog posts.
+    * @property {string} author - Current user's author name.
+    * @property {boolean} isLoggedIn - Indicates whether the user is logged in.
+    * @property {boolean} showModal - Flag to show or hide the add post modal.
+    * @property {boolean} showUpdateModal - Flag to show or hide the update post modal.
+    * @property {Object|null} selectedPost - The selected post to be updated.
+    */
     data() {
         return {
             posts: null,
             author: "",
             isLoggedIn: false,
             showModal: false,
-            startDate: null,
-            endDate: null
+            showUpdateModal: false,
+            selectedPost: null
         };
     },
     mounted() {
         // When the page loads, check if the user is logged in and fetch all posts
         this.checkLoginStatus();
-        this.getAllPosts();
+        this.getAllMyPosts();
     },
     methods: {
         /**
@@ -75,20 +80,20 @@ export default {
         *
         * @method
         * @name checkLoginStatus
-        * @memberof BlogPage
+        * @memberof MyPosts
         */
         checkLoginStatus() {
             var token = sessionStorage.getItem("token");
             this.isLoggedIn = !!token;
         },
         /**
-         * Returns all texts.
+         * Gets all posts of the current user.
          *
          * @method
-         * @name getAllPosts
-         * @memberof BlogPage
+         * @name getAllMyPosts
+         * @memberof MyPosts
          */
-        getAllPosts() {
+        getAllMyPosts() {
             var token = sessionStorage.getItem("token");
             var myHeaders = new Headers();
             myHeaders.append("Authorization", "Bearer " + token);
@@ -99,7 +104,7 @@ export default {
                 redirect: 'follow'
             };
 
-            fetch("http://localhost:5000/post/get_all_posts", requestOptions)
+            fetch("http://localhost:5000/post/get_currentuser_post", requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log('result get all posts: ', result);
@@ -109,37 +114,11 @@ export default {
 
         },
         /**
-        * Filters posts based on start and end dates.
-        *
-        * @method
-        * @name filterPosts
-        * @memberof BlogPage
-        */
-        filterPosts() {
-            var token = sessionStorage.getItem("token");
-            var myHeaders = new Headers();
-            myHeaders.append("Authorization", "Bearer " + token);
-
-            var requestOptions = {
-                method: 'GET',
-                headers: myHeaders,
-                redirect: 'follow'
-            };
-
-            fetch(`http://localhost:5000/post/get_posts_by_date?start_date=${this.startDate}&end_date=${this.endDate}`, requestOptions)
-                .then(response => response.json())
-                .then(result => {
-                    console.log('get_posts_by_date: ', result);
-                    this.posts = result;
-                })
-                .catch(error => console.log('error', error));
-        },
-        /**
         * Handles opening the add post modal.
         *
         * @method
         * @name handleModal
-        * @memberof BlogPage
+        * @memberof MyPosts
         */
         handleModal() {
             this.showModal = true
@@ -149,10 +128,60 @@ export default {
         *
         * @method
         * @name handleCloseModal
-        * @memberof BlogPage
+        * @memberof MyPosts
         */
         handleCloseModal() {
             this.showModal = false
+        },
+        /**
+         * Handles closing the update post modal.
+         *
+         * @method
+         * @name handleUpdateCloseModal
+         * @memberof MyPosts
+         */
+        handleUpdateCloseModal() {
+            this.showUpdateModal = false
+        },
+        /**
+        * Deletes a post.
+        *
+        * @method
+        * @name deletePost
+        * @memberof MyPosts
+        * @param {number} postId - The ID of the post to be deleted.
+        */
+        deletePost(postId) {
+            var token = sessionStorage.getItem("token");
+            var myHeaders = new Headers();
+            myHeaders.append("Authorization", "Bearer " + token);
+
+            var requestOptions = {
+                method: 'DELETE',
+                headers: myHeaders,
+                redirect: 'follow'
+            };
+
+            fetch(`http://localhost:5000/post/delete_post/${postId}`, requestOptions)
+                .then(response => response.json())
+                .then(result => {
+                    console.log('result delete: ', result);
+                    this.getAllMyPosts();
+                })
+                .catch(error => console.log('error', error));
+        },
+        /**
+         * Handles updating a post.
+         *
+         * @method
+         * @name updatePost
+         * @memberof MyPosts
+         * @param {Object} item - The post object to be updated.
+         */
+        updatePost(item) {
+            console.log(item);
+            this.selectedPost = item
+            this.showUpdateModal = true;
         }
     }
 };
@@ -160,7 +189,7 @@ export default {
 
 <style scoped>
 .container {
-    padding: .25rem;
+    width: 80%;
     margin: 0 auto;
 }
 
@@ -187,19 +216,6 @@ export default {
     margin: 10px 0;
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
 }
-
-.filter-div {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    margin-top: 1rem;
-}
-
-.datefilter {
-    display: flex;
-    flex-direction: column;
-}
-
 .author-div {
     display: flex;
     justify-content: space-between;
@@ -220,25 +236,6 @@ export default {
     border-radius: .25rem;
 }
 
-input {
-    height: .10rem;
-}
-
-label {
-    font-family: Poppins;
-    font-weight: bold;
-    line-height: 0;
-}
-
-.filter-btn {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 64px;
-    height: 32px;
-    background-color: #01377D;
-}
-
 .detail-btn:hover {
     cursor: pointer;
 }
@@ -256,11 +253,49 @@ label {
 }
 
 .add-post-btn {
-    padding: .5rem;
+    padding: 1rem;
     background-color: #248E87;
     color: white;
     border-radius: .25rem;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 20px;
 }
-</style>
+
+.card-footer {
+    width: 100%;
+    padding: .25rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.delete-btn {
+    width: 100px;
+    height: 42px;
+    background-color: #dc0000;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    border: none;
+    border-radius: .25rem;
+    margin: .25rem;
+}
+
+.delete-btn:hover {
+    cursor: pointer;
+}
+
+.update-btn {
+    width: 100px;
+    height: 42px;
+    background-color: #009DD1;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    border: none;
+    border-radius: .25rem;
+    margin: .25rem;
+}
+
+.update-btn:hover {
+    cursor: pointer;
+}</style>
