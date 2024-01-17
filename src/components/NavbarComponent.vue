@@ -1,31 +1,32 @@
 <template>
     <header>
         <nav class="navbar">
-            <div>
-                <img src="../assets/blog.png" alt="logo" width="48" height="48" />
+            <div class="logo-container">
+                <img src="../assets/blog.png" alt="logo" width="60" height="48" />
+                <p class="blog-title">BLOG</p> 
             </div>
             <div>
                 <ul class="navbar-list">
                     <li>
-                        <RouterLink to="/">Home</RouterLink>
+                        <RouterLink to="/posts">Home</RouterLink>
                     </li>
-                    <li>
-                        <RouterLink to="/my-posts">My Posts</RouterLink>
+                    <li v-if="!isLoggedIn">
+                        <RouterLink to="/my-posts">Profile</RouterLink>
                     </li>
-                    <li><a href="#">About</a></li>
+                    <li><RouterLink to="/about">About</RouterLink></li>
                 </ul>
             </div>
             <div class="navbar-buttons" v-if="isLoggedIn">
                 <button class="login-btn">
-                    <RouterLink to="/login" style="color: #6BB3AE;">Login</RouterLink>
+                    <RouterLink to="/login" style="color: white;">Login</RouterLink>
                 </button>
                 <button class="register-btn">
-                    <RouterLink to="/register" style="color: white;">Register</RouterLink>
+                    <RouterLink to="/register" style="color: black;">Register</RouterLink>
                 </button>
             </div>
             <div v-if="!isLoggedIn">
                 <button class="logout-btn">
-                    <RouterLink to="/logout" style="color: #dc0000;">Logout</RouterLink>
+                    <RouterLink to="/logout" style="color: white;">Logout</RouterLink>
                 </button>
             </div>
         </nav>
@@ -73,13 +74,24 @@ export default {
 </script>
 <style scoped>
 .navbar {
-    margin-bottom: 1rem;
     padding: 1rem;
     max-height: 3rem;
-    background-color: #6BB3AE;
+    background-color: #FFC017;
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.blog-title {
+    margin-top: 1rem;
+    margin-left: 0.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: bold;
+    font-size: 1.5rem;
 }
 
 .navbar-list {
@@ -94,7 +106,7 @@ export default {
 
 a {
     text-decoration: none;
-    color: white;
+    color: black;
     font-weight: bold;
     font-family: Poppins;
 }
@@ -103,8 +115,8 @@ a {
     width: 64px;
     height: 32px;
     padding: .25rem;
-    background-color: white;
-    color: #6BB3AE;
+    background-color: black;
+    color: white;
     font-weight: bold;
     font-family: Poppins;
     border-radius: .25rem;
@@ -117,7 +129,7 @@ a {
     height: 32px;
     padding: .25rem;
     background-color: transparent;
-    color: white;
+    color: black;
     font-weight: bold;
     font-family: Poppins;
     border-radius: .25rem;
@@ -128,12 +140,11 @@ a {
     width: 64px;
     height: 32px;
     padding: .25rem;
-    background-color: white;
-    color: #dc0000;
+    background-color: #dc0000;
     font-weight: bold;
     font-family: Poppins;
     border-radius: .25rem;
-    border: 1px solid white;
+    border: 1px solid;
 }
 
 .navbar-buttons {

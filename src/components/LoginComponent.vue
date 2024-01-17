@@ -2,7 +2,7 @@
     <div class="login-container">
         <div class="login-content">
             <div class="login-image">
-                <img src="../assets/login.png" alt="login">
+                <img src="../assets/login.jpg" alt="login">
             </div>
             <div class="login-space"></div>
             <div class="login-form">
@@ -77,8 +77,9 @@ export default {
                 .then(result => {
                     if (result.access_token) {
                         sessionStorage.setItem("token", result.access_token)
+                        sessionStorage.setItem("userId", result.userId)
                         sessionStorage.setItem("isLoggedIn", false)
-                        this.$router.push("/")
+                        this.$router.push("/posts")
                     } else {
                         this.isError = true
                         setTimeout(() => {
@@ -112,7 +113,7 @@ export default {
 }
 
 .login-image img {
-    width: 150%;
+    width: 200%;
     height: 80%;
     padding-top: 40px
 }
@@ -142,18 +143,13 @@ export default {
 
 .login-btn {
     padding: 10px;
-    background-color: #83C0BB;
+    background-color: black;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     width: 110%;
 }
-
-.login-btn:hover {
-    background-color: #088178;
-}
-
 .alert-box {
     margin-top: 1rem;
     background-color: red;
