@@ -35,10 +35,14 @@ export default {
          * @type {Function}
          * @required
          */
+         getAllMyPosts:{
+            type: Function,
+            required: true
+        },
         getAllPosts:{
             type: Function,
             required: true
-        }
+        },
     },
     data() {
         return {
@@ -79,10 +83,13 @@ export default {
                     this.newPostTitle = "";
                     this.newPostContent = "";
                     this.getAllPosts();
+                    this.getAllMyPosts();
                     this.handleCloseModal();
+                    window.location.reload();
                 })
                 .catch(error => console.log('error', error));
         },
+    
     }
 }
 

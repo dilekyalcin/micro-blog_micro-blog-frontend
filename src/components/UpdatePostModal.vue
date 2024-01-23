@@ -13,6 +13,7 @@
             <textarea id="newPostContent" v-model="updatedContent" placeholder="Write your post..."></textarea>
         </div>
         <button @click="updatePost">Update</button>
+        
     </div>
 </template>
 <script>
@@ -91,12 +92,13 @@ export default {
     }
 }
 </script>
-<style>
+<style >
+
 .modal {
     padding: 2rem;
     width: 50%;
-    position: absolute;
-    top: 25%;
+    position: fixed;
+    top: 15%;
     left: 25%;
     background-color: #f9f9f9;
     border-radius: .25rem;

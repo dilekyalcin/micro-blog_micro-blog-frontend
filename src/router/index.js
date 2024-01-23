@@ -2,14 +2,15 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginComponent from '../components/LoginComponent.vue'
 import RegisterComponent from '../components/RegisterComponent.vue'
-import MyPostComponent from "../components/MyPostsComponent.vue"
-import PostDetailComponent from "../components/PostDetailComponent.vue"
+import MyPostComponent from '../components/MyPostsComponent.vue'
+import AboutView from '../views/AboutView.vue'
+import PostComponent from '../components/PostComponent.vue'
 
 /**
  * Vue Router builder function.
  * @function
  * @name createRouter
- * 
+ *
  * @property {string} path - Route URL.
  * @property {string} name - Route name.
  * @property {Object} component - Route component.
@@ -38,10 +39,15 @@ const router = createRouter({
       component: MyPostComponent
     },
     {
-      path: '/post-detail/:id',
-      name: 'post-detail',
-      component: PostDetailComponent
+      path: '/posts',
+      name: 'posts',
+      component: PostComponent
     },
+    {
+      path: '/about',
+      name: 'about',
+      component: AboutView
+    }
   ]
 })
 

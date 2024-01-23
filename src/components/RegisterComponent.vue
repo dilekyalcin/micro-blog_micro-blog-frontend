@@ -2,7 +2,7 @@
     <div class="register-container">
         <div class="register-content">
             <div class="register-image">
-                <img src="../assets/register.png" alt="register" />
+                <img src="../assets/register.jpg" alt="register" />
             </div>
             <div class="login-space"></div>
             <div class="register-form">
@@ -140,16 +140,12 @@ export default {
 
 .register-btn {
     padding: 10px;
-    background-color: #83C0BB;
+    background-color:black;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    width: 100%;
-}
-
-.register-btn:hover {
-    background-color: #088178;
+    width: 85%;
 }
 </style>
   
