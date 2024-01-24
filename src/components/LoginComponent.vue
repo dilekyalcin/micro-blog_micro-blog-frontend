@@ -2,7 +2,7 @@
     <div class="login-container">
         <div class="login-content">
             <div class="login-image">
-                <img src="../assets/login.jpg" alt="login">
+                <img src="../assets/login.png" alt="login">
             </div>
             <div class="login-space"></div>
             <div class="login-form">
@@ -44,7 +44,11 @@ export default {
             isError: false,
             username: '',
             password: '',
+            BACKEND_URL: import.meta.env.VITE_BACKEND_URL
         };
+    },
+    mounted(){
+        
     },
     methods: {
         /**
@@ -72,13 +76,14 @@ export default {
             };
 
             //If user is logged in, store token and redirect to home page
-            fetch("http://localhost:5000/auth/login", requestOptions)
+            fetch(this.BACKEND_URL + "/auth/login", requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     if (result.access_token) {
                         sessionStorage.setItem("token", result.access_token)
                         sessionStorage.setItem("userId", result.userId)
-                        sessionStorage.setItem("isLoggedIn", false)
+                        sessionStorage.setItem("isLoggedIn", true)
+                        this.$store.dispatch('saveAuth');
                         this.$router.push("/posts")
                     } else {
                         this.isError = true
@@ -90,7 +95,7 @@ export default {
                     }
                 })
                 .catch(error => console.log('error', error));
-        }
+        },
     }
 };
 </script>
@@ -143,13 +148,14 @@ export default {
 
 .login-btn {
     padding: 10px;
-    background-color: black;
+    background-color: #6b4e71;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     width: 110%;
 }
+
 .alert-box {
     margin-top: 1rem;
     background-color: red;

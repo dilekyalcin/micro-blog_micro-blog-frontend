@@ -23,7 +23,7 @@ body {
 }
 
 .footer {
-  background-color: black;
+  background-color: #C2B2B4;
   color: white;
   font-family: Poppins;
   padding: .25rem .25rem;

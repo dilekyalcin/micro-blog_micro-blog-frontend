@@ -1,11 +1,17 @@
 <template>
+    <div v-if="showOverlay" class="overlay" @click="handleCloseLikesModel"></div>
     <div class="likes-list-modal">
         <button class="close-btn" @click="handleCloseLikesModel">X</button>
         <h4>Likes</h4>
         <ul>
             <li v-for="like in likes" :key="like.id">
                 <hr>
-                <p class="author">{{ like.author_username }}</p>
+                <div class="author">
+                    <div class="icon-container">
+                        <span class="initials">{{ (like.firstname.charAt(0) + like.lastname.charAt(0)).toUpperCase() }} </span>
+                    </div>
+                    <span style="margin-left: .25rem;">{{ like.author_username }}</span>
+                </div>
                 <hr>
             </li>
         </ul>
@@ -36,6 +42,8 @@ export default {
     data() {
         return {
             likes: [],
+            showOverlay: false,
+            BACKEND_URL: import.meta.env.VITE_BACKEND_URL
         };
     },
     watch: {
@@ -49,6 +57,7 @@ export default {
     mounted() {
         // Fetch likes when the component is mounted
         this.getLikes();
+        this.showOverlay = true;
     },
     methods: {
         /**
@@ -67,7 +76,7 @@ export default {
             };
 
             // Fetch likes by post ID from the server
-            fetch(`http://localhost:5000/like/get_all_likes/${this.postId}`, requestOptions)
+            fetch(this.BACKEND_URL + `/like/get_all_likes/${this.postId}`, requestOptions)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -126,7 +135,9 @@ export default {
     font-weight: 200;
     font-style: italic;
     font-family: Poppins;
-    display: block;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
 .likes-list-modal button.close-btn {
@@ -139,5 +150,28 @@ export default {
     position: absolute;
     top: 10px;
     right: 10px;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 999;
+}
+
+.icon-container {
+    width: 30px;
+    height: 30px;
+    background-color: #BDBDBD;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    font-size: .75rem;
 }
 </style>

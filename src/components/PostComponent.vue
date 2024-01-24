@@ -16,6 +16,9 @@
                 <div class="content">
                     <div v-if="isLoggedIn">
                         <div class="card" v-for="item in posts" :key="item.id">
+                            <div class="card-header">
+                                <p class="created-at">{{ formatCreatedAt(item.created_at) }}</p>
+                            </div>
                             <div>
                                 <p class="post-info"> Title: {{ item.title }}</p>
                             </div>
@@ -23,7 +26,12 @@
                                 <p>{{ item.content }}</p>
                             </div>
                             <div class="author-div">
-                                <p>{{ item.author }}</p>
+                                <div style="display: flex;flex-direction: row;align-items: center;">
+                                    <div class="icon-container">
+                                        <span class="initials">{{(item.firstname.charAt(0) + item.lastname.charAt(0)).toUpperCase() }}</span>
+                                    </div>
+                                    <p style="margin-left: .25rem;">{{ item.author }}</p>
+                                </div>
                                 <div style="display: flex;justify-content: center;align-items: center;">
                                     <p @click="toggleLike(item.id, item.likes)" class="heart-icon">
                                         <font-awesome-icon icon="heart" style="margin-right: .25rem;"
@@ -35,15 +43,15 @@
                                     <likes-list-modal v-if="showLikesListModal" :post-id="selectedPostId"
                                         :show-modal="showLikesListModal"
                                         :handle-close-likes-list-modal="handleCloseLikesListModal"></likes-list-modal>
-                                    <p @click="handleShowCommentModal" class="comment-link">Comments</p>
-                                    <comments-modal v-if="showCommentModal"
-                                        :handleCloseCommentModal="handleCloseCommentModal"
-                                        :postId="item.id"></comments-modal>
+
+                                    <p @click="handleShowCommentModal(item.id)" class="comment-link">Comments</p>
 
                                 </div>
                             </div>
                             <hr />
                         </div>
+                        <comments-modal v-if="showCommentModal" :handleCloseCommentModal="handleCloseCommentModal"
+                            :postId="commentPostId"></comments-modal>
                     </div>
                 </div>
             </div>
@@ -86,6 +94,11 @@ export default {
             userId: '',
             showLikesListModal: false,
             selectedPostId: '',
+            selectedCommentPostId: '',
+            commentPostId: '',
+            firstname: "",
+            lastname: "",
+            BACKEND_URL: import.meta.env.VITE_BACKEND_URL
         };
     },
     mounted() {
@@ -124,7 +137,7 @@ export default {
                 redirect: 'follow'
             };
 
-            fetch("http://localhost:5000/post/get_all_posts", requestOptions)
+            fetch(this.BACKEND_URL + "/post/get_all_posts", requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log('result get all posts: ', result);
@@ -151,7 +164,7 @@ export default {
                 redirect: 'follow'
             };
 
-            fetch(`http://localhost:5000/post/get_posts_by_date?start_date=${this.startDate}&end_date=${this.endDate}`, requestOptions)
+            fetch(this.BACKEND_URL + `/post/get_posts_by_date?start_date=${this.startDate}&end_date=${this.endDate}`, requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log('get_posts_by_date: ', result);
@@ -178,7 +191,7 @@ export default {
                     redirect: 'follow'
                 };
 
-                fetch("http://localhost:5000/like/remove_like", requestOptionsRemoveLike)
+                fetch(this.BACKEND_URL + "/like/remove_like", requestOptionsRemoveLike)
                     .then(response => response.json())
                     .then(result => {
                         console.log('removed like: ', result);
@@ -194,7 +207,7 @@ export default {
                     redirect: 'follow'
                 };
 
-                fetch("http://localhost:5000/like/add_like", requestOptionsAddLike)
+                fetch(this.BACKEND_URL + "/like/add_like", requestOptionsAddLike)
                     .then(response => response.json())
                     .then(result => {
                         console.log('add like: ', result);
@@ -205,8 +218,9 @@ export default {
 
             this.isLiked = !this.isLiked;
         },
-        handleShowCommentModal() {
+        handleShowCommentModal(id) {
             this.showCommentModal = true
+            this.commentPostId = id
         },
         handleCloseCommentModal() {
             this.showCommentModal = false
@@ -229,6 +243,10 @@ export default {
         handleCloseLikesListModal() {
             this.showLikesListModal = false;
             this.selectedPostId = '';
+        },
+        formatCreatedAt(createdAt) {
+            const formattedDate = new Date(createdAt).toLocaleString();
+            return formattedDate;
         },
     }
 };
@@ -265,6 +283,19 @@ export default {
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
 }
 
+.created-at {
+    color: #555;
+    font-size: 0.8rem;
+    margin-right: 10px;
+}
+
+.card-header {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+
 .filter-div {
     display: flex;
     flex-direction: row;
@@ -279,6 +310,7 @@ export default {
     align-items: center;
     color: black;
     font-weight: bold;
+
 }
 
 input {
@@ -298,7 +330,7 @@ label {
     align-items: center;
     width: 64px;
     height: 32px;
-    background-color: black;
+    background-color: #53687e;
     margin-top: 0.5rem;
     margin-left: 0.5rem;
 }
@@ -313,10 +345,12 @@ label {
 .liked {
     color: red;
 }
-.likes-count-link{
+
+.likes-count-link {
     text-decoration: underline;
 }
-.likes-count-link:hover{
+
+.likes-count-link:hover {
     cursor: pointer;
 }
 
@@ -331,9 +365,29 @@ label {
 
 .heart-icon {
     margin-right: 4px;
+    color: #bebebe;
 }
 
 .heart-icon:hover {
     cursor: pointer;
+}
+
+.icon-container {
+    width: 30px;
+    height: 30px;
+    background-color: #BDBDBD;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    font-size: .75rem;
+}
+
+.initials {
+    color: white;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    font-size: 1.10rem;
 }
 </style>

@@ -47,6 +47,7 @@ export default {
             newUsername: "",
             newPassword: "",
             email: "",
+            BACKEND_URL: import.meta.env.VITE_BACKEND_URL
         };
     },
     methods: {
@@ -78,7 +79,7 @@ export default {
             };
 
             // Making the API call to register the user
-            fetch("http://localhost:5000/auth/register", requestOptions)
+            fetch(this.BACKEND_URL + "/auth/register", requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log('res: ', result);
@@ -140,7 +141,7 @@ export default {
 
 .register-btn {
     padding: 10px;
-    background-color:black;
+    background-color: #6b4e71;
     color: white;
     border: none;
     border-radius: 4px;
