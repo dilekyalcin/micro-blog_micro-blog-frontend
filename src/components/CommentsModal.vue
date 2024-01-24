@@ -1,52 +1,52 @@
 <template>
+    <div v-if="showOverlay" class="overlay" @click="handleCloseCommentModal"></div>
     <div class="modal">
         <div class="header">
             <h2>Comments</h2>
             <button class="close-btn" @click="handleCloseCommentModal">x</button>
         </div>
-        <div>
-            <div class="add-comment">
-                <button @click="handleShowAdd" style="background-color: black;">Add Comment</button>
-            </div>
-            <template v-if="showInput">
-                <div class="add-comment-input">
-                    <input type="text" v-model="newComment" />
-                    <button @click="handleAdd"><font-awesome-icon icon="add" />Add</button>
+        <div class="scroll-container">
+            <div class="content" v-for="item in comments" :key="item.id">
+                <div>
+                    <p class="author">{{ item.author_username }}</p>
+
+                    <!-- Check edit mode -->
+                    <template v-if="editingCommentId !== item.id">
+                        <p class="post_content">{{ item.content }}</p>
+                    </template>
+                    <template v-else>
+                        <!-- Show input field-->
+                        <input v-model="editedCommentContent" />
+                    </template>
+
                 </div>
-            </template>
-        </div>
-        <div class="content" v-for="item in comments" :key="item.id">
-            <div>
-                <p class="author">{{ item.author_username }}</p>
+                <div v-if="item.author_id == userId" class="comment-management">
+                    <!-- Show Edit and Delete buttons -->
+                    <template v-if="editingCommentId !== item.id">
+                        <button class="edit-btn" @click="startEditingComment(item.id)"><font-awesome-icon
+                                icon="pen-to-square" />Edit</button>
+                        <button class="delete-btn" @click="deleteComment(item.id)"><font-awesome-icon
+                                icon="trash" />Delete</button>
+                    </template>
 
-                <!-- Check edit mode -->
-                <template v-if="editingCommentId !== item.id">
-                    <p class="post_content">{{ item.content }}</p>
-                </template>
-                <template v-else>
-                    <!-- Show input field-->
-                    <input v-model="editedCommentContent" />
-                </template>
-
-            </div>
-            <div v-if="item.author_id == userId" class="comment-management">
-                <!-- Show Edit and Delete buttons -->
-                <template v-if="editingCommentId !== item.id">
-                    <button class="edit-btn" @click="startEditingComment(item.id)"><font-awesome-icon
-                            icon="pen-to-square" />Edit</button>
-                    <button class="delete-btn" @click="deleteComment(item.id)"><font-awesome-icon
-                            icon="trash" />Delete</button>
-                </template>
-
-                <!-- Save and Cancel buttons -->
-                <template v-if="editingCommentId === item.id">
-                    <button class="save-btn" @click="saveEditedComment(item.id)"><font-awesome-icon
-                            icon="save" />Save</button>
-                    <button class="cancel-btn" @click="cancelEditingComment"><font-awesome-icon
-                            icon="xmark" />Cancel</button>
-                </template>
+                    <!-- Save and Cancel buttons -->
+                    <template v-if="editingCommentId === item.id">
+                        <button class="save-btn" @click="saveEditedComment(item.id)"><font-awesome-icon
+                                icon="save" />Save</button>
+                        <button class="cancel-btn" @click="cancelEditingComment"><font-awesome-icon
+                                icon="xmark" />Cancel</button>
+                    </template>
+                </div>
             </div>
         </div>
+        <div class="add-comment-input">
+            <input type="text" v-model="newComment" />
+            <button @click="handleAdd"><font-awesome-icon icon="add" />Add</button>
+        </div>
+        <!-- <div class="add-comment-input">
+            <input type="text" v-model="newComment" />
+            <button @click="handleAdd"><font-awesome-icon icon="add" />Add</button>
+        </div> -->
     </div>
 </template>
 <script>
@@ -86,11 +86,14 @@ export default {
             userId: '',
             editingCommentId: null,
             editedCommentContent: "",
-            showInput: false,
-            newComment: ''
+            newComment: '',
+            showOverlay: true,
+            BACKEND_URL: import.meta.env.VITE_BACKEND_URL
         }
     },
     mounted() {
+        console.log("postId: ", this.postId);
+        this.showOverlay = true
         this.userId = sessionStorage.getItem('userId')
         console.log('userId: ', this.userId)
         this.getAllCommentsById();
@@ -110,10 +113,10 @@ export default {
                 redirect: 'follow'
             };
 
-            fetch(`http://localhost:5000/comment/get_all_comments/${this.postId}`, requestOptions)
+            fetch(this.BACKEND_URL + `/comment/get_all_comments/${this.postId}`, requestOptions)
                 .then(response => response.json())
                 .then(result => {
-                    console.log(result)
+                    console.log("postun comments bilgisi", result)
                     this.comments = result;
                 })
                 .catch(error => console.log('error', error));
@@ -134,7 +137,7 @@ export default {
                 redirect: 'follow'
             };
 
-            fetch(`http://localhost:5000/comment/delete_comment/${commentId}`, requestOptions)
+            fetch(this.BACKEND_URL + `/comment/delete_comment/${commentId}`, requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log('delete comment: ', result)
@@ -176,7 +179,7 @@ export default {
                 redirect: 'follow'
             };
 
-            fetch(`http://localhost:5000/comment/update_comment/${commentId}`, requestOptions)
+            fetch(this.BACKEND_URL + `/comment/update_comment/${commentId}`, requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log("update comment: ", result)
@@ -191,14 +194,6 @@ export default {
         */
         cancelEditingComment() {
             this.editingCommentId = null;
-        },
-
-        /**
-        * Handles the "Add Comment" button click event.
-        * Toggles the visibility of the comment input.
-        */
-        handleShowAdd() {
-            this.showInput = !this.showInput;
         },
 
         /**
@@ -223,7 +218,7 @@ export default {
                 redirect: 'follow'
             };
 
-            fetch("http://localhost:5000/comment/add_comment", requestOptions)
+            fetch(this.BACKEND_URL + "/comment/add_comment", requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log('add comment: ', result);
@@ -239,8 +234,6 @@ export default {
 </script>
 <style scoped>
 .modal {
-    max-height: 350px;
-    overflow-y: scroll;
     padding: 1rem;
     width: 40%;
     position: fixed;
@@ -249,6 +242,10 @@ export default {
     border-radius: .25rem;
     border: 1px solid #112854;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
 }
 
 .header {
@@ -326,9 +323,15 @@ label {
     flex-direction: row;
 }
 
+.scroll-container {
+    max-height: 200px;
+    overflow-y: scroll;
+}
+
+
 .add-comment-input button {
-    background-color: black;
-    width: 60px;
+    background-color: #53687e;
+    width: 20%;
     height: 40px;
     font-size: 12px;
     margin-left: 10px;
@@ -348,5 +351,15 @@ label {
     font-size: 12px;
     background-color: #dc0000;
 
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 999;
 }
 </style>

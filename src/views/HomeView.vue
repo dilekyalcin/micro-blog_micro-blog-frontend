@@ -60,14 +60,19 @@ export default {
 }
 
 .card {
-  background-color: #FFC017;
+  background-color:#3A4454;
   padding: 4rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-
+.card h1{
+  color:white;
+}
+.card p{
+  color: white;
+}
 .btn-home {
-  background-color: black;
+  background-color: #6b4e71;
   border-radius: 2rem;
   color: white;
   padding: 0.5rem 1rem;

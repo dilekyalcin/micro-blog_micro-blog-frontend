@@ -1,9 +1,12 @@
 <template>
     <div style="height: 100%;">
-        <update-post-modal v-if="showUpdateModal" :post="selectedPost" :handleUpdateCloseModal="handleUpdateCloseModal"
-            :getAllMyPosts="getAllMyPosts"></update-post-modal>
         <div class="container">
             <div class="modal-div">
+
+                <button @click="openUpdateProfileModal" class="update-profile-btn">Update Profile</button>
+                <update-profile-modal v-if="showUpdateProfileModal" :closeModal="closeUpdateProfileModal"
+                    :updateData="updateData"></update-profile-modal>
+
                 <add-post-modal v-if="showModal" :handleCloseModal="handleCloseModal"
                     :getAllPosts="getAllPosts"></add-post-modal>
                 <button class="add-post-btn" @click="handleModal">Write</button>
@@ -11,6 +14,9 @@
             <div class="content">
                 <div v-if="isLoggedIn">
                     <div class="card" v-for="item in posts" :key="item.id">
+                        <div class="card-header">
+                            <p class="created-at">{{ formatCreatedAt(item.created_at) }}</p>
+                        </div>
                         <div>
                             <p class="post-info"> Title: {{ item.title }}</p>
                         </div>
@@ -18,7 +24,13 @@
                             <p>{{ item.content }}</p>
                         </div>
                         <div class="author-div">
-                            <p>{{ item.author }}</p>
+                            <div style="display: flex;flex-direction: row;align-items: center;">
+                                <div class="icon-container">
+                                    <span class="initials">{{ (item.firstname.charAt(0) + item.lastname.charAt(0)).toUpperCase()
+                                    }} </span>
+                                </div>
+                                <p style="margin-left: .25rem;">{{ item.author }}</p>
+                            </div>
                             <div style="display: flex;justify-content: center;align-items: center;">
                                 <p @click="toggleLike(item.id, item.likes)" class="heart-icon">
                                     <font-awesome-icon icon="heart" style="margin-right: .25rem;"
@@ -26,14 +38,15 @@
                                 </p>
                                 <p @click="handleShowLikesListModal(item.id)" class="likes-count-link">{{ item.likeCount }}
                                 </p>
+                                <update-post-modal v-if="showUpdateModal" :post="selectedPost"
+                                    :handleUpdateCloseModal="handleUpdateCloseModal"
+                                    :getAllMyPosts="getAllMyPosts"></update-post-modal>
                                 <likes-list-modal v-if="showLikesListModal" :post-id="selectedPostId"
                                     :show-modal="showLikesListModal"
                                     :handle-close-likes-list-modal="handleCloseLikesListModal"></likes-list-modal>
-                                <p @click="handleShowCommentModal" class="comment-link">Comments</p>
-                                <comments-modal v-if="showCommentModal" :handleCloseCommentModal="handleCloseCommentModal"
-                                    :postId="item.id"></comments-modal>
-                            </div>
+                                <p @click="handleShowCommentModal(item.id)" class="comment-link">Comments</p>
 
+                            </div>
                         </div>
                         <div class="card-footer">
                             <button class="delete-btn" @click="deletePost(item.id)">Delete Post</button>
@@ -41,6 +54,8 @@
                         </div>
                         <hr>
                     </div>
+                    <comments-modal v-if="showCommentModal" :handleCloseCommentModal="handleCloseCommentModal"
+                        :post-id="selectedCommentPostId"></comments-modal>
                 </div>
             </div>
         </div>
@@ -52,6 +67,7 @@ import AddPostModal from './AddPostModal.vue';
 import UpdatePostModal from "./UpdatePostModal.vue"
 import CommentsModal from './CommentsModal.vue';
 import LikesListModal from "./LikesListModal.vue";
+import UpdateProfileModal from "./UpdateProfileModal.vue";
 export default {
     /**
      * MyPosts - Component for displaying the current user's blog posts and managing posts.
@@ -65,6 +81,7 @@ export default {
         UpdatePostModal,
         CommentsModal,
         LikesListModal,
+        UpdateProfileModal,
     },
     /**
     * Initial data for the MyPosts component.
@@ -79,6 +96,13 @@ export default {
     */
     data() {
         return {
+            updateData: {
+                firstname: '',
+                lastname: '',
+                username: '',
+                password: '',
+                email: '',
+            },
             posts: null,
             author: "",
             isLoggedIn: false,
@@ -90,6 +114,11 @@ export default {
             selectedPostId: '',
             userId: '',
             showLikesListModal: false,
+            postId: '',
+            selectedCommentPostId: '',
+            created_at: "",
+            showUpdateProfileModal: false,
+            BACKEND_URL: import.meta.env.VITE_BACKEND_URL
         };
     },
     mounted() {
@@ -128,7 +157,7 @@ export default {
                 redirect: 'follow'
             };
 
-            fetch("http://localhost:5000/post/get_currentuser_post", requestOptions)
+            fetch(this.BACKEND_URL + "/post/get_currentuser_post", requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log('result get all posts: ', result);
@@ -186,7 +215,7 @@ export default {
                 redirect: 'follow'
             };
 
-            fetch(`http://localhost:5000/post/delete_post/${postId}`, requestOptions)
+            fetch(this.BACKEND_URL + `/post/delete_post/${postId}`, requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log('result delete: ', result);
@@ -207,8 +236,9 @@ export default {
             this.selectedPost = item
             this.showUpdateModal = true;
         },
-        handleShowCommentModal() {
+        handleShowCommentModal(postId) {
             this.showCommentModal = true
+            this.selectedCommentPostId = postId
         },
         handleCloseCommentModal() {
             this.showCommentModal = false
@@ -233,7 +263,7 @@ export default {
                     redirect: 'follow'
                 };
 
-                fetch("http://localhost:5000/like/remove_like", requestOptionsRemoveLike)
+                fetch(this.BACKEND_URL + "/like/remove_like", requestOptionsRemoveLike)
                     .then(response => response.json())
                     .then(result => {
                         console.log('removed like: ', result);
@@ -249,7 +279,7 @@ export default {
                     redirect: 'follow'
                 };
 
-                fetch("http://localhost:5000/like/add_like", requestOptionsAddLike)
+                fetch(this.BACKEND_URL + "/like/add_like", requestOptionsAddLike)
                     .then(response => response.json())
                     .then(result => {
                         console.log('add like: ', result);
@@ -273,6 +303,16 @@ export default {
             this.showLikesListModal = false;
             this.selectedPostId = '';
         },
+        formatCreatedAt(createdAt) {
+            const formattedDate = new Date(createdAt).toLocaleString();
+            return formattedDate;
+        },
+        openUpdateProfileModal() {
+            this.showUpdateProfileModal = true;
+        },
+        closeUpdateProfileModal() {
+            this.showUpdateProfileModal = false;
+        },
     }
 };
 </script>
@@ -292,7 +332,7 @@ export default {
 }
 
 .card {
-    width: 60%;
+    width: 100%;
     margin: auto;
     margin-bottom: 1rem;
     padding: 1rem;
@@ -300,7 +340,7 @@ export default {
     display: flex;
     flex-direction: column;
     flex: 1;
-
+    max-width: 800px;
 }
 
 .card hr {
@@ -318,11 +358,25 @@ export default {
     color: black;
     font-weight: bold;
 }
+
 .post-info {
     color: black;
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 0.5rem;
+}
+
+.created-at {
+    color: #555;
+    font-size: 0.8rem;
+    margin-right: 10px;
+}
+
+.card-header {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
 }
 
 .modal-div {
@@ -333,12 +387,12 @@ export default {
 .add-post-btn {
     margin-top: 1rem;
     padding: .6rem;
-    width: 80px;
-    background-color: black;
+    width: 60px;
+    background-color: #6b4e71;
     color: white;
     border-radius: .25rem;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 12px;
 }
 
 .card-footer {
@@ -383,14 +437,18 @@ export default {
 .liked {
     color: red;
 }
-.likes-count-link{
+
+.likes-count-link {
     text-decoration: underline;
 }
-.likes-count-link:hover{
+
+.likes-count-link:hover {
     cursor: pointer;
 }
+
 .heart-icon {
     margin-right: 4px;
+    color: #bebebe;
 }
 
 .comment-link {
@@ -400,5 +458,28 @@ export default {
 
 .comment-link:hover {
     cursor: pointer;
+}
+
+.update-profile-btn {
+    margin-right: 4px;
+    margin-top: 1rem;
+    padding: .6rem;
+    width: 60px;
+    border-radius: .25rem;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.icon-container {
+    width: 30px;
+    height: 30px;
+    background-color: #BDBDBD;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    font-size: .75rem;
 }
 </style>

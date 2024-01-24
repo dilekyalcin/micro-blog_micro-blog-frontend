@@ -1,4 +1,5 @@
 <template>
+    <div v-if="showOverlay" class="overlay" @click="handleCloseModal"></div>
     <div class="modal">
         <div class="header">
             <h2>Create a new post</h2>
@@ -38,17 +39,18 @@ export default {
          getAllMyPosts:{
             type: Function,
             required: true
-        },
-        getAllPosts:{
-            type: Function,
-            required: true
-        },
+        }
     },
     data() {
         return {
             newPostContent: "",
             newPostTitle: "",
+            showOverlay: false,
+            BACKEND_URL: import.meta.env.VITE_BACKEND_URL
         }
+    },
+    mounted(){
+        this.showOverlay = true;
     },
     methods:{
         /**
@@ -76,14 +78,12 @@ export default {
                 body: raw,
                 redirect: 'follow',
             };
-            fetch("http://localhost:5000/post/add_post", requestOptions)
+            fetch(this.BACKEND_URL + "/post/add_post", requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log('result create post: ', result);
                     this.newPostTitle = "";
                     this.newPostContent = "";
-                    this.getAllPosts();
-                    this.getAllMyPosts();
                     this.handleCloseModal();
                     window.location.reload();
                 })
@@ -101,10 +101,11 @@ export default {
     position: absolute;
     top: 25%;
     left: 25%;
-    background-color: #f9f9f9;
+    background-color: white;
     border-radius: .25rem;
     border: 1px solid #112854;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
 }
 .header{
     display: flex;
@@ -135,11 +136,20 @@ textarea {
 }
 
 button {
-    background-color: #248E87;
+    background-color: #53687e;
     color: white;
     padding: 0.5rem 1rem;
     border: none;
     border-radius: 3px;
     cursor: pointer;
+}
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 999;
 }
 </style>
