@@ -13,6 +13,16 @@
                     </div>
                     <button class="filter-btn" @click="filterPosts">Filter</button>
                 </div>
+                <div class="search-div">
+                    <input v-model="searchQuery" @input="performSearch" placeholder="Search users..."
+                        style="width: 25%; display: block;">
+                    <div v-for="user in searchedUsers" :key="user.username" class="item search">
+                        <!-- Use router-link to navigate to UserDetail page -->
+                        <router-link :to="{ name: 'user-detail', params: { username: user.username } }">
+                            <p>{{ user.firstname }} {{ user.lastname }}</p>
+                        </router-link>
+                    </div>
+                </div>
                 <div class="content">
                     <div v-if="isLoggedIn">
                         <div class="card" v-for="item in posts" :key="item.id">
@@ -28,16 +38,18 @@
                             <div class="author-div">
                                 <div style="display: flex;flex-direction: row;align-items: center;">
                                     <div class="icon-container">
-                                        <span class="initials">{{(item.firstname.charAt(0) + item.lastname.charAt(0)).toUpperCase() }}</span>
+                                        <span class="initials">{{ (item.firstname.charAt(0) +
+                                            item.lastname.charAt(0)).toUpperCase() }}</span>
                                     </div>
-                                    <p style="margin-left: .25rem;">{{ item.author }}</p>
+                                    <p style="margin-left: .25rem; margin-bottom: 1.5rem;">{{ item.author }}</p>
                                 </div>
                                 <div style="display: flex;justify-content: center;align-items: center;">
                                     <p @click="toggleLike(item.id, item.likes)" class="heart-icon">
                                         <font-awesome-icon icon="heart" style="margin-right: .25rem;"
                                             :class="{ 'liked': isUserLiked(item.likes) }" />
                                     </p>
-                                    <p @click="handleShowLikesListModal(item.id)" class="likes-count-link">{{ item.likeCount
+                                    <p @click="handleShowLikesListModal(item.id)" class="likes-count-link">{{
+                                        item.likeCount
                                     }}
                                     </p>
                                     <likes-list-modal v-if="showLikesListModal" :post-id="selectedPostId"
@@ -98,7 +110,9 @@ export default {
             commentPostId: '',
             firstname: "",
             lastname: "",
-            BACKEND_URL: import.meta.env.VITE_BACKEND_URL
+            BACKEND_URL: import.meta.env.VITE_BACKEND_URL,
+            userSearchQuery: "",
+            searchedUsers: [],
         };
     },
     mounted() {
@@ -106,8 +120,20 @@ export default {
         this.userId = sessionStorage.getItem("userId")
         this.checkLoginStatus();
         this.getAllPosts();
+        this.performSearch();
     },
     methods: {
+        performSearch() {
+            // Replace the URL with the actual endpoint to fetch user data from the backend
+            fetch(this.BACKEND_URL + `/user/search_users?query=${this.searchQuery}`)
+                .then(response => response.json())
+                .then(data => {
+                    this.searchedUsers = data;
+                })
+                .catch(error => {
+                    console.error('Error fetching searched users:', error);
+                });
+        },
         /**
         * Checks user login status.
         *
@@ -256,6 +282,7 @@ export default {
 .container {
     padding: .25rem;
     margin: 0 auto;
+
 }
 
 .content {
@@ -304,6 +331,13 @@ export default {
     margin-left: 1rem;
 }
 
+.search-div {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+
+}
+
 .author-div {
     display: flex;
     justify-content: space-between;
@@ -328,11 +362,27 @@ label {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 64px;
-    height: 32px;
+    width: 50px;
+    height: 20px;
     background-color: #53687e;
     margin-top: 0.5rem;
     margin-left: 0.5rem;
+}
+
+.item {
+    display: flex;
+    flex-direction: column;
+    width: 150px;
+    margin: 0 auto 10px auto;
+    padding: 10px 20px;
+    color: white;
+    border-radius: 5px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px,
+        rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
+}
+
+.search {
+    cursor: pointer;
 }
 
 .post-info {
@@ -390,4 +440,31 @@ label {
     font-family: "Roboto", "Helvetica", "Arial", sans-serif;
     font-size: 1.10rem;
 }
-</style>
+
+
+h2 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+input {
+    padding: 8px;
+    margin-bottom: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    /* Ensure padding and border are included in the total width */
+}
+
+div {
+    margin-bottom: 20px;
+}
+
+p {
+    margin: 5px 0;
+}
+
+/* Style for router-link */
+.router-link-exact-active {
+    color: blue;
+    /* Change the color for the active link as needed */
+}</style>

@@ -5,6 +5,7 @@ import RegisterComponent from '../components/RegisterComponent.vue'
 import MyPostComponent from '../components/MyPostsComponent.vue'
 import AboutView from '../views/AboutView.vue'
 import PostComponent from '../components/PostComponent.vue'
+import UserDetail from '../components/UserDetail.vue'
 
 /**
  * Vue Router builder function.
@@ -47,6 +48,11 @@ const router = createRouter({
       path: '/about',
       name: 'about',
       component: AboutView
+    },
+    {
+      path: '/user/:username',
+      name: 'user-detail',
+      component: UserDetail,
     },
   ]
 })
