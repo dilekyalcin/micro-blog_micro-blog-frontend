@@ -125,7 +125,7 @@ export default {
     methods: {
         performSearch() {
             // Replace the URL with the actual endpoint to fetch user data from the backend
-            fetch(this.BACKEND_URL + `/user/search_users?query=${this.searchQuery}`)
+            fetch(this.BACKEND_URL + `/user/search-users?query=${this.searchQuery}`)
                 .then(response => response.json())
                 .then(data => {
                     this.searchedUsers = data;
@@ -163,7 +163,7 @@ export default {
                 redirect: 'follow'
             };
 
-            fetch(this.BACKEND_URL + "/post/get_all_posts", requestOptions)
+            fetch(this.BACKEND_URL + "/post/all-posts", requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log('result get all posts: ', result);
@@ -190,7 +190,7 @@ export default {
                 redirect: 'follow'
             };
 
-            fetch(this.BACKEND_URL + `/post/get_posts_by_date?start_date=${this.startDate}&end_date=${this.endDate}`, requestOptions)
+            fetch(this.BACKEND_URL + `/post/posts-by-date?start_date=${this.startDate}&end_date=${this.endDate}`, requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log('get_posts_by_date: ', result);
@@ -217,7 +217,7 @@ export default {
                     redirect: 'follow'
                 };
 
-                fetch(this.BACKEND_URL + "/like/remove_like", requestOptionsRemoveLike)
+                fetch(this.BACKEND_URL + "/like", requestOptionsRemoveLike)
                     .then(response => response.json())
                     .then(result => {
                         console.log('removed like: ', result);
@@ -233,7 +233,7 @@ export default {
                     redirect: 'follow'
                 };
 
-                fetch(this.BACKEND_URL + "/like/add_like", requestOptionsAddLike)
+                fetch(this.BACKEND_URL + "/like", requestOptionsAddLike)
                     .then(response => response.json())
                     .then(result => {
                         console.log('add like: ', result);

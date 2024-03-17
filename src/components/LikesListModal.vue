@@ -76,7 +76,7 @@ export default {
             };
 
             // Fetch likes by post ID from the server
-            fetch(this.BACKEND_URL + `/like/get_all_likes/${this.postId}`, requestOptions)
+            fetch(this.BACKEND_URL + `/like/all-likes/${this.postId}`, requestOptions)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! Status: ${response.status}`);

@@ -86,7 +86,7 @@ export default {
                 redirect: 'follow'
             };
 
-            fetch(this.BACKEND_URL + `/post/update_post/${this.postId}`, requestOptions)
+            fetch(this.BACKEND_URL + `/post/${this.postId}`, requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log('result update: ', result);

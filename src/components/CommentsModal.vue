@@ -113,7 +113,7 @@ export default {
                 redirect: 'follow'
             };
 
-            fetch(this.BACKEND_URL + `/comment/get_all_comments/${this.postId}`, requestOptions)
+            fetch(this.BACKEND_URL + `/comment/all-comments/${this.postId}`, requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log("postun comments bilgisi", result)
@@ -137,7 +137,7 @@ export default {
                 redirect: 'follow'
             };
 
-            fetch(this.BACKEND_URL + `/comment/delete_comment/${commentId}`, requestOptions)
+            fetch(this.BACKEND_URL + `/comment/${commentId}`, requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log('delete comment: ', result)
@@ -179,7 +179,7 @@ export default {
                 redirect: 'follow'
             };
 
-            fetch(this.BACKEND_URL + `/comment/update_comment/${commentId}`, requestOptions)
+            fetch(this.BACKEND_URL + `/comment/${commentId}`, requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log("update comment: ", result)
@@ -218,7 +218,7 @@ export default {
                 redirect: 'follow'
             };
 
-            fetch(this.BACKEND_URL + "/comment/add_comment", requestOptions)
+            fetch(this.BACKEND_URL + "/comment", requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log('add comment: ', result);

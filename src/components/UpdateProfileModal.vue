@@ -93,7 +93,7 @@ export default {
                 redirect: 'follow'
             };
 
-            fetch(this.BACKEND_URL + "/user/update_user", requestOptions)
+            fetch(this.BACKEND_URL + "/user", requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log('result update: ', result);

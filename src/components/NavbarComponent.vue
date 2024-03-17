@@ -87,7 +87,7 @@ export default {
                     redirect: 'follow',
                 };
 
-                fetch(this.BACKEND_URL + '/user/get_user_info', requestOptions)
+                fetch(this.BACKEND_URL + '/user/user-info', requestOptions)
                     .then(response => response.json())
                     .then(result => {
                         console.log('User information response:', result);
