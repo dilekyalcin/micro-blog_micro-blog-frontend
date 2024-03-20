@@ -8,7 +8,12 @@
         <div class="scroll-container">
             <div class="content" v-for="item in comments" :key="item.id">
                 <div>
-                    <p class="author">{{ item.author_username }}</p>
+                    <router-link :to="{ name: 'user-detail', params: { username: item.author_username } }" @click="handleCloseModal" v-if="item.author_username !== authorizedUsername">
+                        <p class="author">{{ item.author_username }}</p>
+                    </router-link>
+                    <router-link :to="{ name: 'my-posts' }" @click="handleCloseModal" v-else>
+                        <p class="author">{{ item.author_username }}</p>
+                    </router-link>
 
                     <!-- Check edit mode -->
                     <template v-if="editingCommentId !== item.id">
@@ -80,6 +85,7 @@ export default {
     },
     data() {
         return {
+            authorizedUsername: '',
             newPostContent: "",
             newPostTitle: "",
             comments: null,
@@ -93,6 +99,7 @@ export default {
     },
     mounted() {
         console.log("postId: ", this.postId);
+        this.authorizedUsername = sessionStorage.getItem("authorizedUsername")
         this.showOverlay = true
         this.userId = sessionStorage.getItem('userId')
         console.log('userId: ', this.userId)
@@ -103,6 +110,7 @@ export default {
         * Fetches all comments for the current post.
         */
         getAllCommentsById() {
+            console.log("postId: ", this.postId);
             var token = sessionStorage.getItem("token")
             var myHeaders = new Headers();
             myHeaders.append("Authorization", "Bearer " + token);

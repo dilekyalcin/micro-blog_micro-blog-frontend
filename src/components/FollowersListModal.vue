@@ -1,20 +1,17 @@
 <template>
-    <div v-if="showOverlay" class="overlay" @click="handleCloseLikesModel"></div>
-    <div class="likes-list-modal">
-        <button class="close-btn" @click="handleCloseLikesModel">X</button>
-        <h4>Likes</h4>
+    <div v-if="showOverlay" class="overlay" @click="handleCloseModal"></div>
+    <div class="list-modal">
+        <button class="close-btn" @click="handleCloseModal">X</button>
+        <h4>Followers</h4>
         <ul>
-            <li v-for="like in likes" :key="like.id">
+            <li v-for="item in followers">
                 <hr>
-                <div class="author">
-                    <div class="icon-container">
-                        <span class="initials">{{ (like.firstname.charAt(0) + like.lastname.charAt(0)).toUpperCase() }} </span>
-                    </div>
-                    <router-link :to="{ name: 'user-detail', params: { username: like.author_username } }" @click="handleCloseModal" v-if="like.author_username !== authorizedUsername">
-                        <span style="margin-left:.25rem;">{{ like.author_username }}</span>
+                <div class="user">
+                    <router-link :to="{ name: 'user-detail', params: { username: item } }" @click="handleCloseModal" v-if="item !== authorizedUsername">
+                        <span style="margin-left:.25rem;">{{ item }}</span>
                     </router-link>
                     <router-link :to="{ name: 'my-posts' }" @click="handleCloseModal" v-else>
-                        <span style="margin-left:.25rem;">{{ like.author_username }}</span>
+                        <span style="margin-left:.25rem;">{{ item }}</span>
                     </router-link>
                 </div>
                 <hr>
@@ -24,22 +21,21 @@
 </template>
 
 <script>
-/**
- * LikesListModal Component
- * 
- * This component displays a modal containing a list of likes for a post.
- * 
- * @component
- * @props {Function} handleCloseLikesListModal - Function to handle closing the modal.
- * @props {String} postId - ID of the post for which likes are displayed.
- */
 export default {
     props: {
-        handleCloseLikesListModal: {
+        handleCloseModal: {
             type: Function,
             required: true
         },
-        postId: {
+        items: {
+            type: Array,
+            required: true
+        },
+        showOverlay: {
+            type: Boolean,
+            required: true
+        },
+        username:{
             type: String,
             required: true
         }
@@ -47,30 +43,26 @@ export default {
     data() {
         return {
             authorizedUsername: '',
-            likes: [],
+            followers: [],
             showOverlay: false,
             BACKEND_URL: import.meta.env.VITE_BACKEND_URL
         };
     },
     watch: {
-        // Watch for changes in postId prop
         postId: function (newVal) {
             if (newVal) {
-                this.getLikes();
+                this.getFollowing();
             }
         },
     },
     mounted() {
         this.authorizedUsername = sessionStorage.getItem("authorizedUsername")
-        // Fetch likes when the component is mounted
-        this.getLikes();
+        console.log("username mounted: ", this.username)
+        this.getFollowing();
         this.showOverlay = true;
     },
     methods: {
-        /**
-        * Fetches likes for the current post from the server.
-        */
-        getLikes() {
+        getFollowing() {
             var token = sessionStorage.getItem("token");
             var myHeaders = new Headers();
             myHeaders.append("Authorization", "Bearer " + token);
@@ -82,8 +74,7 @@ export default {
                 redirect: 'follow'
             };
 
-            // Fetch likes by post ID from the server
-            fetch(this.BACKEND_URL + `/like/all-likes/${this.postId}`, requestOptions)
+            fetch(this.BACKEND_URL + `/user/${this.username}/followers`, requestOptions)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -91,26 +82,17 @@ export default {
                     return response.json();
                 })
                 .then(result => {
-                    console.log('result likes: ', result);
-                    this.likes = result;
+                    this.followers = result.followers;
+                    console.log("followrs:", result)
                 })
                 .catch(error => console.log('error', error))
         },
-
-        /**
-         * Closes the likes modal.
-         * Clears the likes data and calls the parent component's method to close the modal.
-         */
-        handleCloseLikesModel() {
-            this.likes = []; // Clear the likes when closing the modal
-            this.handleCloseLikesListModal(); // Call the parent component's method to close the modal
-        },
-    },
+    }
 };
 </script>
 
 <style scoped>
-.likes-list-modal {
+.list-modal {
     background-color: white;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -126,17 +108,17 @@ export default {
     height: 50%;
 }
 
-.likes-list-modal ul {
+.list-modal ul {
     list-style: none;
     padding: 0;
 }
 
-.likes-list-modal li {
+.list-modal li {
     margin-bottom: 10px;
     font-size: 14px;
 }
 
-.likes-list-modal .author {
+.list-modal .user {
     color: #01377D;
     font-size: 12px;
     font-weight: 200;
@@ -147,7 +129,7 @@ export default {
     align-items: center;
 }
 
-.likes-list-modal button.close-btn {
+.list-modal button.close-btn {
     color: black;
     border: none;
     padding: 8px;
@@ -182,3 +164,4 @@ export default {
     font-size: .75rem;
 }
 </style>
+
