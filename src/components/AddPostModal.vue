@@ -13,6 +13,24 @@
             <label for="newPostContent">Content:</label>
             <textarea id="newPostContent" v-model="newPostContent" placeholder="Write your post..."></textarea>
         </div>
+        <div class="form-group">
+            <label>Tag:</label><br>
+            <div style="display: flex;flex-direction: row;justify-content: flex-end;">
+                <input style="width:10%" type="radio" id="existingTag" value="existingTag" v-model="selectedTagType">
+                <label for="existingTag">Existing Tag</label><br>
+                <input style="width:10%" type="radio" id="newTag" value="newTag" v-model="selectedTagType">
+                <label for="newTag">New Tag</label><br>
+            </div>
+            <div v-if="selectedTagType === 'existingTag'">
+                <select v-model="selectedExistingTag" style="width: 50%;height: 2rem;padding:.5rem;border-radius: .2rem;">
+                    <option v-for="tag in existingTags" :key="tag.id" :value="tag.id">{{ tag.name }}</option>
+                </select>
+            </div>
+            <div v-else-if="selectedTagType === 'newTag'">
+                <input type="text" v-model="newTagName" placeholder="Enter new tag name" style="width: 50%;height:2rem;padding:.5rem;border-radius: .2rem;margin-right: .5rem;" />
+                <button @click="createNewTag">Create Tag</button>
+            </div>
+        </div>
         <button @click="createPost">Publish</button>
     </div>
 </template>
@@ -46,11 +64,16 @@ export default {
             newPostContent: "",
             newPostTitle: "",
             showOverlay: false,
-            BACKEND_URL: import.meta.env.VITE_BACKEND_URL
+            BACKEND_URL: import.meta.env.VITE_BACKEND_URL,
+            existingTags: null,
+            selectedTagType: 'existingTag',
+            selectedExistingTag: null,
+            newTagName: ''
         }
     },
     mounted(){
         this.showOverlay = true;
+        this.getTags();
     },
     methods:{
         /**
@@ -69,7 +92,8 @@ export default {
             var raw = JSON.stringify({
                 title: this.newPostTitle,
                 content: this.newPostContent,
-                author: this.author
+                author: this.author,
+                tag_id: this.selectedExistingTag
             });
 
             var requestOptions = {
@@ -89,6 +113,50 @@ export default {
                 })
                 .catch(error => console.log('error', error));
         },
+
+        getTags(){
+            var token = sessionStorage.getItem("token");
+            var myHeaders = new Headers();
+            myHeaders.append("Authorization", "Bearer " + token);
+            myHeaders.append("Content-Type", "application/json");
+            var requestOptions = {
+                method: 'GET',
+                headers: myHeaders,
+                redirect: 'follow',
+            };
+            fetch(this.BACKEND_URL + "/tag/managed-tags", requestOptions)
+                .then(response => response.json())
+                .then(result => {
+                    console.log(result);
+                    this.existingTags = result;
+                })
+                .catch(error => console.log('error', error));
+        },
+
+        createNewTag(){
+            var token = sessionStorage.getItem("token");
+            var myHeaders = new Headers();
+            myHeaders.append("Authorization", "Bearer " + token);
+            myHeaders.append("Content-Type", "application/json");
+
+            var raw = JSON.stringify({
+                "tag_name": this.newTagName
+            });
+
+            var requestOptions = {
+                method: 'POST',
+                headers: myHeaders,
+                body: raw,
+                redirect: 'follow',
+            };
+            fetch(this.BACKEND_URL + "/tag/managed-tags", requestOptions)
+                .then(response => response.json())
+                .then(result => {
+                    this.newTagName = "";
+                    this.getTags();
+                })
+                .catch(error => console.log('error', error));
+        }
     
     }
 }
@@ -99,7 +167,7 @@ export default {
     padding: 2rem;
     width: 50%;
     position: absolute;
-    top: 25%;
+    top: 10%;
     left: 25%;
     background-color: white;
     border-radius: .25rem;
