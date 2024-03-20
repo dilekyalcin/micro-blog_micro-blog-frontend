@@ -78,7 +78,7 @@ export default {
                 body: raw,
                 redirect: 'follow',
             };
-            fetch(this.BACKEND_URL + "/post/add_post", requestOptions)
+            fetch(this.BACKEND_URL + "/post", requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log('result create post: ', result);

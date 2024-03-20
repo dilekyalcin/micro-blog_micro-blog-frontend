@@ -157,7 +157,7 @@ export default {
                 redirect: 'follow'
             };
 
-            fetch(this.BACKEND_URL + "/post/get_currentuser_post", requestOptions)
+            fetch(this.BACKEND_URL + "/post/currentuser-post", requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log('result get all posts: ', result);
@@ -215,7 +215,7 @@ export default {
                 redirect: 'follow'
             };
 
-            fetch(this.BACKEND_URL + `/post/delete_post/${postId}`, requestOptions)
+            fetch(this.BACKEND_URL + `/post/${postId}`, requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     console.log('result delete: ', result);
@@ -263,7 +263,7 @@ export default {
                     redirect: 'follow'
                 };
 
-                fetch(this.BACKEND_URL + "/like/remove_like", requestOptionsRemoveLike)
+                fetch(this.BACKEND_URL + "/like", requestOptionsRemoveLike)
                     .then(response => response.json())
                     .then(result => {
                         console.log('removed like: ', result);
@@ -279,7 +279,7 @@ export default {
                     redirect: 'follow'
                 };
 
-                fetch(this.BACKEND_URL + "/like/add_like", requestOptionsAddLike)
+                fetch(this.BACKEND_URL + "/like", requestOptionsAddLike)
                     .then(response => response.json())
                     .then(result => {
                         console.log('add like: ', result);
