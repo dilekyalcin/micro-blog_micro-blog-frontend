@@ -57,7 +57,6 @@ export default {
     },
     mounted() {
         this.authorizedUsername = sessionStorage.getItem("authorizedUsername")
-        console.log("username mounted: ", this.username)
         this.getFollowing();
         this.showOverlay = true;
     },
@@ -83,7 +82,6 @@ export default {
                 })
                 .then(result => {
                     this.followers = result.followers;
-                    console.log("followrs:", result)
                 })
                 .catch(error => console.log('error', error))
         },

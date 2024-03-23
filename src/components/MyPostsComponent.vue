@@ -191,7 +191,6 @@ export default {
             fetch(this.BACKEND_URL + "/post/currentuser-post", requestOptions)
                 .then(response => response.json())
                 .then(result => {
-                    console.log('result get all posts: ', result);
                     this.posts = result;
                 })
                 .catch(error => console.log('error', error));
@@ -275,7 +274,6 @@ export default {
             fetch(this.BACKEND_URL + `/post/${postId}`, requestOptions)
                 .then(response => response.json())
                 .then(result => {
-                    console.log('result delete: ', result);
                     this.getAllMyPosts();
                 })
                 .catch(error => console.log('error', error));
@@ -302,7 +300,6 @@ export default {
         },
         toggleLike(id, likes) {
             const isExistLike = likes.some(like => like.user_id === this.userId);
-            console.log(isExistLike);
             var token = sessionStorage.getItem("token");
             var myHeaders = new Headers();
             myHeaders.append("Content-Type", "application/json");
@@ -311,7 +308,6 @@ export default {
                 "post_id": id
             });
             if (isExistLike) {
-
 
                 var requestOptionsRemoveLike = {
                     method: 'DELETE',
@@ -323,7 +319,6 @@ export default {
                 fetch(this.BACKEND_URL + "/like/managed-like", requestOptionsRemoveLike)
                     .then(response => response.json())
                     .then(result => {
-                        console.log('removed like: ', result);
                         this.getAllMyPosts()
                     })
                     .catch(error => console.log('error', error));
@@ -339,7 +334,6 @@ export default {
                 fetch(this.BACKEND_URL + "/like/managed-like", requestOptionsAddLike)
                     .then(response => response.json())
                     .then(result => {
-                        console.log('add like: ', result);
                         this.getAllMyPosts()
                     })
                     .catch(error => console.log('error', error));

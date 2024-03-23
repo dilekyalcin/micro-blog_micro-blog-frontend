@@ -123,7 +123,6 @@ export default {
         },
         fetchUserData() {
             const authorizedUsername = sessionStorage.getItem("authorizedUsername");
-            console.log("authorized: ", authorizedUsername);
             const username = this.$route.params.username;
             this.username = username;
             var token = sessionStorage.getItem("token");
@@ -156,7 +155,6 @@ export default {
                 .then(response => response.json())
                 .then(data => {
                     this.followersCount = data.count;
-                    console.log("data: ", data);
                     for (let i = 0; i < data.followers.length; i++) {
                         if (data.followers[i] == authorizedUsername) {
                             this.isFollowing = true;
@@ -167,7 +165,6 @@ export default {
         },
         toggleLike(id, likes) {
             const isExistLike = likes.some(like => like.user_id === this.userId);
-            console.log(isExistLike);
             var token = sessionStorage.getItem("token");
             var myHeaders = new Headers();
             myHeaders.append("Content-Type", "application/json");
@@ -187,7 +184,6 @@ export default {
                 fetch(this.BACKEND_URL + "/like/managed-like", requestOptionsRemoveLike)
                     .then(response => response.json())
                     .then(result => {
-                        console.log('removed like: ', result);
                         this.fetchUserData();
                     })
                     .catch(error => console.log('error', error));
@@ -203,7 +199,6 @@ export default {
                 fetch(this.BACKEND_URL + "/like/managed-like", requestOptionsAddLike)
                     .then(response => response.json())
                     .then(result => {
-                        console.log('add like: ', result);
                         this.fetchUserData();
                     })
                     .catch(error => console.log('error', error));
@@ -258,7 +253,6 @@ export default {
             fetch(this.BACKEND_URL + followEndpoint, requestOptions)
                 .then(response => response.json())
                 .then(result => {
-                    console.log(result);
                     this.isFollowing = !this.isFollowing;
                     this.fetchUserData();
                 })

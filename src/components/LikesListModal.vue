@@ -91,7 +91,6 @@ export default {
                     return response.json();
                 })
                 .then(result => {
-                    console.log('result likes: ', result);
                     this.likes = result;
                 })
                 .catch(error => console.log('error', error))
