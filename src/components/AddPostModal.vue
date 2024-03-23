@@ -105,7 +105,6 @@ export default {
             fetch(this.BACKEND_URL + "/post", requestOptions)
                 .then(response => response.json())
                 .then(result => {
-                    console.log('result create post: ', result);
                     this.newPostTitle = "";
                     this.newPostContent = "";
                     this.handleCloseModal();
@@ -127,7 +126,6 @@ export default {
             fetch(this.BACKEND_URL + "/tag/managed-tags", requestOptions)
                 .then(response => response.json())
                 .then(result => {
-                    console.log(result);
                     this.existingTags = result;
                 })
                 .catch(error => console.log('error', error));

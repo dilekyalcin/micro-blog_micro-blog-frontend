@@ -158,7 +158,6 @@ export default {
     },
     methods: {
         async performSearch() {
-            console.log(this.userSearchQuery.length);
             if (this.userSearchQuery.length != 0) {
                 var token = sessionStorage.getItem("token");
                 var myHeaders = new Headers();
@@ -169,7 +168,6 @@ export default {
                     headers: myHeaders,
                     redirect: 'follow'
                 };
-                console.log("search query: ", this.userSearchQuery);
 
                 await fetch(this.BACKEND_URL + `/user/search-users?query=${this.userSearchQuery}`, requestOptions)
                     .then(response => response.json())
@@ -181,7 +179,6 @@ export default {
                         console.error('Error fetching searched users:', error);
                     });
             } else if(this.userSearchQuery.length == 0) {
-                console.log("girdi");
                 this.resultsContainer = false
                 this.searchedUsers = [];
             }
@@ -219,7 +216,6 @@ export default {
             fetch(this.BACKEND_URL + "/post/following-posts", requestOptions)
                 .then(response => response.json())
                 .then(result => {
-                    console.log('result get all posts: ', result);
                     this.posts = result;
                 })
                 .catch(error => console.log('error', error));
@@ -246,14 +242,12 @@ export default {
             fetch(this.BACKEND_URL + `/post/posts-by-date?start_date=${this.startDate}&end_date=${this.endDate}`, requestOptions)
                 .then(response => response.json())
                 .then(result => {
-                    console.log('get_posts_by_date: ', result);
                     this.posts = result;
                 })
                 .catch(error => console.log('error', error));
         },
         toggleLike(id, likes) {
             const isExistLike = likes.some(like => like.user_id === this.userId);
-            console.log(isExistLike);
             var token = sessionStorage.getItem("token");
             var myHeaders = new Headers();
             myHeaders.append("Content-Type", "application/json");
@@ -273,7 +267,6 @@ export default {
                 fetch(this.BACKEND_URL + "/like/managed-like", requestOptionsRemoveLike)
                     .then(response => response.json())
                     .then(result => {
-                        console.log('removed like: ', result);
                         this.getAllPosts()
                         this.getPopularTags();
                     })
@@ -290,7 +283,6 @@ export default {
                 fetch(this.BACKEND_URL + "/like/managed-like", requestOptionsAddLike)
                     .then(response => response.json())
                     .then(result => {
-                        console.log('add like: ', result);
                         this.getAllPosts()
                         this.getPopularTags();
                     })
@@ -404,14 +396,12 @@ export default {
                 .catch(error => console.log('error', error));
         },
         handleSearch() {
-            console.log(this.selectedTag);
             this.handleFilterByFollowingTag(this.selectedTag);
         }
     }
 };
 </script>
 
-<!-- <style src="vue-multiselect/dist/vue-multiselect.min.css"></style> -->
 <style scoped>
 .container {
     padding: .25rem;
