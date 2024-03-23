@@ -2,68 +2,96 @@
     <div>
         <div v-if="isLoggedIn">
             <div class="container">
-                <div class="filter-div">
-                    <div class="datefilter">
-                        <label for="">Start Date</label>
-                        <input type="date" name="startDate" v-model="startDate">
+                <div class="content-container">
+                    <div class="search-div">
+                        <input v-model="userSearchQuery" @input="performSearch" placeholder="Search users..."
+                            style="width: 25%; display: block;">
                     </div>
-                    <div class="datefilter">
-                        <label for="">End Date</label>
-                        <input type="date" name="enddate" v-model="endDate">
-                    </div>
-                    <button class="filter-btn" @click="filterPosts">Filter</button>
-                </div>
-                <div class="search-div">
-                    <input v-model="searchQuery" @input="performSearch" placeholder="Search users..."
-                        style="width: 25%; display: block;">
-                    <div v-for="user in searchedUsers" :key="user.username" class="item search">
-                        <!-- Use router-link to navigate to UserDetail page -->
-                        <router-link :to="{ name: 'user-detail', params: { username: user.username } }">
-                            <p>{{ user.firstname }} {{ user.lastname }}</p>
-                        </router-link>
-                    </div>
-                </div>
-                <div class="content">
-                    <div v-if="isLoggedIn">
-                        <div class="card" v-for="item in posts" :key="item.id">
-                            <div class="card-header">
-                                <p class="created-at">{{ formatCreatedAt(item.created_at) }}</p>
-                            </div>
-                            <div>
-                                <p class="post-info"> Title: {{ item.title }}</p>
-                            </div>
-                            <div>
-                                <p>{{ item.content }}</p>
-                            </div>
-                            <div class="author-div">
-                                <div style="display: flex;flex-direction: row;align-items: center;">
-                                    <div class="icon-container">
-                                        <span class="initials">{{ (item.firstname.charAt(0) +
-                                            item.lastname.charAt(0)).toUpperCase() }}</span>
-                                    </div>
-                                    <p style="margin-left: .25rem; margin-bottom: 1.5rem;">{{ item.author }}</p>
-                                </div>
-                                <div style="display: flex;justify-content: center;align-items: center;">
-                                    <p @click="toggleLike(item.id, item.likes)" class="heart-icon">
-                                        <font-awesome-icon icon="heart" style="margin-right: .25rem;"
-                                            :class="{ 'liked': isUserLiked(item.likes) }" />
-                                    </p>
-                                    <p @click="handleShowLikesListModal(item.id)" class="likes-count-link">{{
-                                        item.likeCount
-                                    }}
-                                    </p>
-                                    <likes-list-modal v-if="showLikesListModal" :post-id="selectedPostId"
-                                        :show-modal="showLikesListModal"
-                                        :handle-close-likes-list-modal="handleCloseLikesListModal"></likes-list-modal>
-
-                                    <p @click="handleShowCommentModal(item.id)" class="comment-link">Comments</p>
-
-                                </div>
-                            </div>
-                            <hr />
+                    <div class="search-results-container" v-if="resultsContainer">
+                        <div v-for="user in searchedUsers"
+                            v-if="searchedUsers"
+                            :key="user.username" class="item search">
+                            <router-link :to="{ name: 'user-detail', params: { username: user.username } }">
+                                <p>{{ user.firstname }} {{ user.lastname }}</p>
+                            </router-link>
                         </div>
-                        <comments-modal v-if="showCommentModal" :handleCloseCommentModal="handleCloseCommentModal"
-                            :postId="commentPostId"></comments-modal>
+                    </div>
+                    <div class="content">
+                        <div v-if="isLoggedIn">
+                            <div class="card" v-for="item in posts" :key="item.id">
+                                <div class="card-header">
+                                    <p class="created-at">{{ formatCreatedAt(item.created_at) }}</p>
+                                </div>
+                                <div>
+                                    <p class="post-info"> Title: {{ item.title }}</p>
+                                </div>
+                                <div>
+                                    <p>{{ item.content }}</p>
+                                </div>
+                                <div class="author-div">
+                                    <div style="display: flex;flex-direction: row;align-items: center;">
+                                        <div class="icon-container">
+                                            <span class="initials">{{ (item.firstname.charAt(0) +
+            item.lastname.charAt(0)).toUpperCase() }}</span>
+                                        </div>
+                                        <!-- <p style="margin-left: .25rem; margin-bottom: 1.5rem;">{{ item.author }}</p> -->
+                                        <router-link :to="{ name: 'user-detail', params: { username: item.author } }">
+                                         <p style="margin-left:.25rem;">{{ item.author }}</p>
+                                        </router-link>
+                                    </div>
+                                    <div style="display: flex;justify-content: center;align-items: center;">
+                                        <p @click="toggleLike(item.id, item.likes)" class="heart-icon">
+                                            <font-awesome-icon icon="heart" style="margin-right: .25rem;"
+                                                :class="{ 'liked': isUserLiked(item.likes) }" />
+                                        </p>
+                                        <p @click="handleShowLikesListModal(item.id)" class="likes-count-link">
+                                            {{ item.likeCount }}
+                                        </p>
+                                        <likes-list-modal v-if="showLikesListModal" :post-id="selectedPostId"
+                                            :show-modal="showLikesListModal"
+                                            :handle-close-likes-list-modal="handleCloseLikesListModal"></likes-list-modal>
+
+                                        <p @click="handleShowCommentModal(item.id)" class="comment-link">Comments</p>
+                                        <p class="tag-container">
+                                            #{{ item.tag }}
+                                        </p>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <comments-modal v-if="showCommentModal" :handleCloseCommentModal="handleCloseCommentModal"
+                                :postId="commentPostId"></comments-modal>
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-div">
+                    <div class="main-filter">
+                        <div class="datefilter">
+                            <label for="">Start Date</label>
+                            <input type="date" name="startDate" v-model="startDate">
+                        </div>
+                        <div class="datefilter">
+                            <label for="">End Date</label>
+                            <input type="date" name="enddate" v-model="endDate">
+                        </div>
+                        <button class="filter-btn" @click="filterPosts">Filter</button>
+                    </div>
+                    <div class="popular-tags">
+                        <h3>Popular Tags</h3>
+                        <div class="tag-buttons">
+                            <button class="tag-btn" v-for="tag in popularTags" :key="tag.tag_name"
+                                @click="handleFilterByTag(tag.tag_name)"># {{ tag.tag_name }}</button>
+                        </div>
+                    </div>
+                    <div class="search-tags">
+                        <select v-model="selectedTag"
+                            style="height: 2rem;padding:.5rem;border-radius: .2rem;margin-right:0.5rem; width:100%;">
+                            <option v-for="tag in existingTags" :key="tag.id" :value="tag.name">{{ tag.name }}</option>
+                        </select>
+                        <button class="search-btn" @click="handleSearch">Search</button>
+                    </div>
+                    <div class="reset-div">
+                        <button class="reset-btn" @click="handleResetFilter">Reset Filter</button>
                     </div>
                 </div>
             </div>
@@ -80,6 +108,7 @@
 import CommentsModal from "./CommentsModal.vue"
 import LikesListModal from "./LikesListModal.vue";
 import HomePage from '../views/HomeView.vue';
+
 export default {
     /**
      * BlogPage - Component for displaying blog posts and creating new posts.
@@ -91,10 +120,11 @@ export default {
     components: {
         CommentsModal,
         LikesListModal,
-        HomePage,
+        HomePage
     },
     data() {
         return {
+            resultsContainer: false,
             isLiked: false,
             posts: null,
             author: "",
@@ -113,6 +143,9 @@ export default {
             BACKEND_URL: import.meta.env.VITE_BACKEND_URL,
             userSearchQuery: "",
             searchedUsers: [],
+            popularTags: null,
+            selectedTag: '',
+            existingTags: null
         };
     },
     mounted() {
@@ -120,20 +153,37 @@ export default {
         this.userId = sessionStorage.getItem("userId")
         this.checkLoginStatus();
         this.getAllPosts();
-        this.performSearch();
+        this.getPopularTags();
+        this.getTags();
     },
     methods: {
-        performSearch() {
-            // Replace the URL with the actual endpoint to fetch user data from the backend
-            fetch(this.BACKEND_URL + `/user/search-users?query=${this.searchQuery}`)
-                .then(response => response.json())
-                .then(data => {
-                    this.searchedUsers = data;
-                })
-                .catch(error => {
-                    console.error('Error fetching searched users:', error);
-                });
+        async performSearch() {
+            if (this.userSearchQuery.length != 0) {
+                var token = sessionStorage.getItem("token");
+                var myHeaders = new Headers();
+                myHeaders.append("Authorization", "Bearer " + token);
+
+                var requestOptions = {
+                    method: 'GET',
+                    headers: myHeaders,
+                    redirect: 'follow'
+                };
+
+                await fetch(this.BACKEND_URL + `/user/search-users?query=${this.userSearchQuery}`, requestOptions)
+                    .then(response => response.json())
+                    .then(data => {
+                        this.searchedUsers = data;
+                        this.resultsContainer = true;
+                    })
+                    .catch(error => {
+                        console.error('Error fetching searched users:', error);
+                    });
+            } else if(this.userSearchQuery.length == 0) {
+                this.resultsContainer = false
+                this.searchedUsers = [];
+            }
         },
+
         /**
         * Checks user login status.
         *
@@ -163,10 +213,9 @@ export default {
                 redirect: 'follow'
             };
 
-            fetch(this.BACKEND_URL + "/post/all-posts", requestOptions)
+            fetch(this.BACKEND_URL + "/post/following-posts", requestOptions)
                 .then(response => response.json())
                 .then(result => {
-                    console.log('result get all posts: ', result);
                     this.posts = result;
                 })
                 .catch(error => console.log('error', error));
@@ -193,14 +242,12 @@ export default {
             fetch(this.BACKEND_URL + `/post/posts-by-date?start_date=${this.startDate}&end_date=${this.endDate}`, requestOptions)
                 .then(response => response.json())
                 .then(result => {
-                    console.log('get_posts_by_date: ', result);
                     this.posts = result;
                 })
                 .catch(error => console.log('error', error));
         },
         toggleLike(id, likes) {
             const isExistLike = likes.some(like => like.user_id === this.userId);
-            console.log(isExistLike);
             var token = sessionStorage.getItem("token");
             var myHeaders = new Headers();
             myHeaders.append("Content-Type", "application/json");
@@ -217,11 +264,11 @@ export default {
                     redirect: 'follow'
                 };
 
-                fetch(this.BACKEND_URL + "/like", requestOptionsRemoveLike)
+                fetch(this.BACKEND_URL + "/like/managed-like", requestOptionsRemoveLike)
                     .then(response => response.json())
                     .then(result => {
-                        console.log('removed like: ', result);
                         this.getAllPosts()
+                        this.getPopularTags();
                     })
                     .catch(error => console.log('error', error));
             } else {
@@ -233,11 +280,11 @@ export default {
                     redirect: 'follow'
                 };
 
-                fetch(this.BACKEND_URL + "/like", requestOptionsAddLike)
+                fetch(this.BACKEND_URL + "/like/managed-like", requestOptionsAddLike)
                     .then(response => response.json())
                     .then(result => {
-                        console.log('add like: ', result);
                         this.getAllPosts()
+                        this.getPopularTags();
                     })
                     .catch(error => console.log('error', error));
             }
@@ -274,6 +321,83 @@ export default {
             const formattedDate = new Date(createdAt).toLocaleString();
             return formattedDate;
         },
+        getPopularTags() {
+            var token = sessionStorage.getItem("token");
+            var myHeaders = new Headers();
+            myHeaders.append("Authorization", "Bearer " + token);
+
+            var requestOptions = {
+                method: 'GET',
+                headers: myHeaders,
+                redirect: 'follow'
+            };
+
+            fetch(this.BACKEND_URL + `/tag/popular-tags`, requestOptions)
+                .then(response => response.json())
+                .then(result => {
+                    this.popularTags = result;
+                })
+                .catch(error => console.log('error', error));
+        },
+        handleFilterByTag(tagName) {
+            var token = sessionStorage.getItem("token");
+            var myHeaders = new Headers();
+            myHeaders.append("Authorization", "Bearer " + token);
+
+            var requestOptions = {
+                method: 'GET',
+                headers: myHeaders,
+                redirect: 'follow'
+            };
+
+            fetch(this.BACKEND_URL + `/tag/${tagName}`, requestOptions)
+                .then(response => response.json())
+                .then(result => {
+                    this.posts = result;
+                })
+                .catch(error => console.log('error', error));
+        },
+        handleFilterByFollowingTag(tagName) {
+            var token = sessionStorage.getItem("token");
+            var myHeaders = new Headers();
+            myHeaders.append("Authorization", "Bearer " + token);
+
+            var requestOptions = {
+                method: 'GET',
+                headers: myHeaders,
+                redirect: 'follow'
+            };
+
+            fetch(this.BACKEND_URL + `/tag/${tagName}/followed-users-posts`, requestOptions)
+                .then(response => response.json())
+                .then(result => {
+                    this.posts = result;
+                })
+                .catch(error => console.log('error', error));
+        },
+        handleResetFilter() {
+            this.getAllPosts();
+        },
+        getTags() {
+            var token = sessionStorage.getItem("token");
+            var myHeaders = new Headers();
+            myHeaders.append("Authorization", "Bearer " + token);
+            myHeaders.append("Content-Type", "application/json");
+            var requestOptions = {
+                method: 'GET',
+                headers: myHeaders,
+                redirect: 'follow',
+            };
+            fetch(this.BACKEND_URL + "/tag/followed-users-tags", requestOptions)
+                .then(response => response.json())
+                .then(result => {
+                    this.existingTags = result;
+                })
+                .catch(error => console.log('error', error));
+        },
+        handleSearch() {
+            this.handleFilterByFollowingTag(this.selectedTag);
+        }
     }
 };
 </script>
@@ -281,8 +405,14 @@ export default {
 <style scoped>
 .container {
     padding: .25rem;
-    margin: 0 auto;
+    margin: 1rem 1rem;
+    display: flex;
+    flex-direction: row;
 
+}
+
+.container .content-container {
+    min-width: 75%;
 }
 
 .content {
@@ -325,10 +455,14 @@ export default {
 
 .filter-div {
     display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
+    flex-direction: column;
     margin-top: 1rem;
     margin-left: 1rem;
+}
+
+.filter-div .main-filter {
+    display: flex;
+    flex-direction: row;
 }
 
 .search-div {
@@ -371,8 +505,9 @@ label {
 
 .item {
     display: flex;
+    justify-content: center;
+    align-items: center;
     flex-direction: column;
-    width: 150px;
     margin: 0 auto 10px auto;
     padding: 10px 20px;
     color: white;
@@ -433,6 +568,7 @@ label {
     color: white;
     font-family: "Roboto", "Helvetica", "Arial", sans-serif;
     font-size: .75rem;
+    margin-top: 15px;
 }
 
 .initials {
@@ -467,4 +603,75 @@ p {
 .router-link-exact-active {
     color: blue;
     /* Change the color for the active link as needed */
-}</style>
+}
+
+.tag-container {
+    padding: .25rem .25rem;
+    border-radius: .5rem;
+    background-color: #efefef;
+    color: black;
+    font-weight: bold;
+    margin-left: .5rem;
+}
+
+.popular-tags {
+    display: flex;
+    background-color: #efefef;
+    border-radius: .75rem;
+    width: 100%;
+    height: 25vh;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+
+.popular-tags h3 {
+    margin: .5rem;
+}
+
+.popular-tags .tag-buttons {
+    display: flex;
+    flex-direction: row;
+    margin: .5rem;
+    flex-wrap: wrap;
+}
+
+.tag-btn {
+    padding: .5rem .5rem;
+    border-radius: .5rem;
+    background-color: #112854;
+    color: white;
+    font-weight: bold;
+    margin: .5rem;
+}
+
+.reset-div {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.reset-div .reset-btn {
+    padding: .5rem .5rem;
+    background-color: orange;
+    color: white;
+    border-radius: .5rem;
+    font-weight: bold;
+}
+
+.search-tags {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.search-results-container {
+    max-height: 200px;
+    width: 30%;
+    overflow-y: auto;
+    margin-left: 35%;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+ 
+}
+</style>
