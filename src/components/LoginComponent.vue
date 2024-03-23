@@ -67,7 +67,6 @@ export default {
                 "password": this.password
             })
 
-            console.log(raw);
             var requestOptions = {
                 method: 'POST',
                 headers: myHeaders,
@@ -80,6 +79,7 @@ export default {
                 .then(response => response.json())
                 .then(result => {
                     if (result.access_token) {
+                        sessionStorage.setItem("authorizedUsername", this.username);
                         sessionStorage.setItem("token", result.access_token)
                         sessionStorage.setItem("userId", result.userId)
                         sessionStorage.setItem("isLoggedIn", true)

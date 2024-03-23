@@ -8,7 +8,12 @@
         <div class="scroll-container">
             <div class="content" v-for="item in comments" :key="item.id">
                 <div>
-                    <p class="author">{{ item.author_username }}</p>
+                    <router-link :to="{ name: 'user-detail', params: { username: item.author_username } }" @click="handleCloseModal" v-if="item.author_username !== authorizedUsername">
+                        <p class="author">{{ item.author_username }}</p>
+                    </router-link>
+                    <router-link :to="{ name: 'my-posts' }" @click="handleCloseModal" v-else>
+                        <p class="author">{{ item.author_username }}</p>
+                    </router-link>
 
                     <!-- Check edit mode -->
                     <template v-if="editingCommentId !== item.id">
@@ -80,6 +85,7 @@ export default {
     },
     data() {
         return {
+            authorizedUsername: '',
             newPostContent: "",
             newPostTitle: "",
             comments: null,
@@ -92,10 +98,9 @@ export default {
         }
     },
     mounted() {
-        console.log("postId: ", this.postId);
+        this.authorizedUsername = sessionStorage.getItem("authorizedUsername")
         this.showOverlay = true
         this.userId = sessionStorage.getItem('userId')
-        console.log('userId: ', this.userId)
         this.getAllCommentsById();
     },
     methods: {
@@ -116,7 +121,6 @@ export default {
             fetch(this.BACKEND_URL + `/comment/all-comments/${this.postId}`, requestOptions)
                 .then(response => response.json())
                 .then(result => {
-                    console.log("postun comments bilgisi", result)
                     this.comments = result;
                 })
                 .catch(error => console.log('error', error));
@@ -140,7 +144,6 @@ export default {
             fetch(this.BACKEND_URL + `/comment/${commentId}`, requestOptions)
                 .then(response => response.json())
                 .then(result => {
-                    console.log('delete comment: ', result)
                     this.getAllCommentsById()
                 })
                 .catch(error => console.log('error', error));
@@ -171,7 +174,6 @@ export default {
                 "content": this.editedCommentContent
             });
 
-            console.log('updated: ', raw)
             var requestOptions = {
                 method: 'PUT',
                 headers: myHeaders,
@@ -181,9 +183,6 @@ export default {
 
             fetch(this.BACKEND_URL + `/comment/${commentId}`, requestOptions)
                 .then(response => response.json())
-                .then(result => {
-                    console.log("update comment: ", result)
-                })
                 .catch(error => console.log('error', error));
             this.editingCommentId = null;
             this.getAllCommentsById();
@@ -221,7 +220,6 @@ export default {
             fetch(this.BACKEND_URL + "/comment", requestOptions)
                 .then(response => response.json())
                 .then(result => {
-                    console.log('add comment: ', result);
                     this.newComment = ''
                     this.getAllCommentsById();
                 })

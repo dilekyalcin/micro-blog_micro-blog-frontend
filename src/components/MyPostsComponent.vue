@@ -1,16 +1,28 @@
 <template>
     <div style="height: 100%;">
         <div class="container">
-            <div class="modal-div">
+            <div class="profile-stats" style="display:flex;flex-direction: row;justify-content: space-between;align-items: center;margin-bottom: 1rem;">
+                <div style="display: flex;flex-direction: row;">
+                    <p>Posts: {{ posts ? posts.length : 0 }}</p>
+                    <p class="follow-count" @click="handleShowFollowersModal">Followers: {{ followersCount }}</p>
+                    <p class="follow-count" @click="handleShowFollowingModal">Following: {{  followingCount }}</p>
+                </div>
 
-                <button @click="openUpdateProfileModal" class="update-profile-btn">Update Profile</button>
+                <div>
+                    <button @click="openUpdateProfileModal" class="update-profile-btn">Update Profile</button>
+                    <button class="add-post-btn" @click="handleModal">Write</button>
+                </div>
+                
+                <FollowersListModal v-if="showFollowersModal" :items="followers" :showOverlay="true"
+                    :handleCloseModal="handleCloseFollowersModal" :username="username" />
+                <FollowingListModal v-if="showFollowingModal" :items="following" :showOverlay="true"
+                    :handleCloseModal="handleCloseFollowingModal" :username="username" />
                 <update-profile-modal v-if="showUpdateProfileModal" :closeModal="closeUpdateProfileModal"
                     :updateData="updateData"></update-profile-modal>
-
                 <add-post-modal v-if="showModal" :handleCloseModal="handleCloseModal"
                     :getAllPosts="getAllPosts"></add-post-modal>
-                <button class="add-post-btn" @click="handleModal">Write</button>
             </div>
+                
             <div class="content">
                 <div v-if="isLoggedIn">
                     <div class="card" v-for="item in posts" :key="item.id">
@@ -26,8 +38,9 @@
                         <div class="author-div">
                             <div style="display: flex;flex-direction: row;align-items: center;">
                                 <div class="icon-container">
-                                    <span class="initials">{{ (item.firstname.charAt(0) + item.lastname.charAt(0)).toUpperCase()
-                                    }} </span>
+                                    <span class="initials">{{ (item.firstname.charAt(0) +
+                    item.lastname.charAt(0)).toUpperCase()
+                                        }} </span>
                                 </div>
                                 <p style="margin-left: .25rem;">{{ item.author }}</p>
                             </div>
@@ -36,7 +49,8 @@
                                     <font-awesome-icon icon="heart" style="margin-right: .25rem;"
                                         :class="{ 'liked': isUserLiked(item.likes) }" />
                                 </p>
-                                <p @click="handleShowLikesListModal(item.id)" class="likes-count-link">{{ item.likeCount }}
+                                <p @click="handleShowLikesListModal(item.id)" class="likes-count-link">{{ item.likeCount
+                                    }}
                                 </p>
                                 <update-post-modal v-if="showUpdateModal" :post="selectedPost"
                                     :handleUpdateCloseModal="handleUpdateCloseModal"
@@ -47,6 +61,10 @@
                                 <p @click="handleShowCommentModal(item.id)" class="comment-link">Comments</p>
 
                             </div>
+                            <div
+                                style="padding: .5rem .5rem;border-radius: .5rem;background-color: #efefef;color: black;">
+                                #{{ item.tag }}
+                            </div>
                         </div>
                         <div class="card-footer">
                             <button class="delete-btn" @click="deletePost(item.id)">Delete Post</button>
@@ -55,7 +73,7 @@
                         <hr>
                     </div>
                     <comments-modal v-if="showCommentModal" :handleCloseCommentModal="handleCloseCommentModal"
-                        :post-id="selectedCommentPostId"></comments-modal>
+                        :postId="selectedCommentPostId"></comments-modal>
                 </div>
             </div>
         </div>
@@ -68,6 +86,9 @@ import UpdatePostModal from "./UpdatePostModal.vue"
 import CommentsModal from './CommentsModal.vue';
 import LikesListModal from "./LikesListModal.vue";
 import UpdateProfileModal from "./UpdateProfileModal.vue";
+import FollowersListModal from './FollowersListModal.vue';
+import FollowingListModal from './FollowingListModal.vue';
+
 export default {
     /**
      * MyPosts - Component for displaying the current user's blog posts and managing posts.
@@ -82,6 +103,8 @@ export default {
         CommentsModal,
         LikesListModal,
         UpdateProfileModal,
+        FollowersListModal,
+        FollowingListModal
     },
     /**
     * Initial data for the MyPosts component.
@@ -103,6 +126,7 @@ export default {
                 password: '',
                 email: '',
             },
+            username: "",
             posts: null,
             author: "",
             isLoggedIn: false,
@@ -118,14 +142,21 @@ export default {
             selectedCommentPostId: '',
             created_at: "",
             showUpdateProfileModal: false,
-            BACKEND_URL: import.meta.env.VITE_BACKEND_URL
+            BACKEND_URL: import.meta.env.VITE_BACKEND_URL,
+            followersCount: 0,
+            followingCount: 0,
+            postCount: 0,
+            showFollowersModal: false,
+            showFollowingModal: false,
         };
     },
     mounted() {
         // When the page loads, check if the user is logged in and fetch all posts
         this.userId = sessionStorage.getItem("userId")
+        this.username = sessionStorage.getItem("authorizedUsername")
         this.checkLoginStatus();
         this.getAllMyPosts();
+        this.getProfileStats();
     },
     methods: {
         /**
@@ -160,10 +191,35 @@ export default {
             fetch(this.BACKEND_URL + "/post/currentuser-post", requestOptions)
                 .then(response => response.json())
                 .then(result => {
-                    console.log('result get all posts: ', result);
                     this.posts = result;
                 })
                 .catch(error => console.log('error', error));
+
+        },
+        getProfileStats() {
+            const username = sessionStorage.getItem("authorizedUsername");
+            var token = sessionStorage.getItem("token");
+            var myHeaders = new Headers();
+            myHeaders.append("Authorization", "Bearer " + token);
+
+            var requestOptions = {
+                method: 'GET',
+                headers: myHeaders,
+                redirect: 'follow'
+            };
+            fetch(this.BACKEND_URL + `/user/${username}/following`, requestOptions)
+                .then(response => response.json())
+                .then(data => {
+                    this.followingCount = data.count;
+                })
+                .catch(error => console.error('Error fetching following count:', error));
+
+            fetch(this.BACKEND_URL + `/user/${username}/followers`, requestOptions)
+                .then(response => response.json())
+                .then(data => {
+                    this.followersCount = data.count;
+                })
+                .catch(error => console.error('Error fetching followers count:', error));
 
         },
         /**
@@ -218,7 +274,6 @@ export default {
             fetch(this.BACKEND_URL + `/post/${postId}`, requestOptions)
                 .then(response => response.json())
                 .then(result => {
-                    console.log('result delete: ', result);
                     this.getAllMyPosts();
                 })
                 .catch(error => console.log('error', error));
@@ -245,7 +300,6 @@ export default {
         },
         toggleLike(id, likes) {
             const isExistLike = likes.some(like => like.user_id === this.userId);
-            console.log(isExistLike);
             var token = sessionStorage.getItem("token");
             var myHeaders = new Headers();
             myHeaders.append("Content-Type", "application/json");
@@ -255,7 +309,6 @@ export default {
             });
             if (isExistLike) {
 
-
                 var requestOptionsRemoveLike = {
                     method: 'DELETE',
                     headers: myHeaders,
@@ -263,10 +316,9 @@ export default {
                     redirect: 'follow'
                 };
 
-                fetch(this.BACKEND_URL + "/like", requestOptionsRemoveLike)
+                fetch(this.BACKEND_URL + "/like/managed-like", requestOptionsRemoveLike)
                     .then(response => response.json())
                     .then(result => {
-                        console.log('removed like: ', result);
                         this.getAllMyPosts()
                     })
                     .catch(error => console.log('error', error));
@@ -279,10 +331,9 @@ export default {
                     redirect: 'follow'
                 };
 
-                fetch(this.BACKEND_URL + "/like", requestOptionsAddLike)
+                fetch(this.BACKEND_URL + "/like/managed-like", requestOptionsAddLike)
                     .then(response => response.json())
                     .then(result => {
-                        console.log('add like: ', result);
                         this.getAllMyPosts()
                     })
                     .catch(error => console.log('error', error));
@@ -313,11 +364,36 @@ export default {
         closeUpdateProfileModal() {
             this.showUpdateProfileModal = false;
         },
+        handleShowFollowersModal() {
+            this.showFollowersModal = true;
+        },
+        handleShowFollowingModal() {
+            this.showFollowingModal = true;
+        },
+        handleCloseFollowersModal() {
+            this.showFollowersModal = false
+        },
+        handleCloseFollowingModal() {
+            this.showFollowingModal = false
+        },
     }
 };
 </script>
 
 <style scoped>
+.profile-stats {
+    display: flex;
+    flex-direction: row;
+}
+
+.profile-stats p {
+    padding-right: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
 .container {
     width: 95%;
     margin: 0 auto;
@@ -377,11 +453,6 @@ export default {
     display: flex;
     justify-content: flex-end;
     align-items: flex-start;
-}
-
-.modal-div {
-    display: flex;
-    justify-content: flex-end;
 }
 
 .add-post-btn {
@@ -464,7 +535,7 @@ export default {
     margin-right: 4px;
     margin-top: 1rem;
     padding: .6rem;
-    width: 60px;
+    width: 120px;
     border-radius: .25rem;
     font-weight: bold;
     font-size: 12px;
