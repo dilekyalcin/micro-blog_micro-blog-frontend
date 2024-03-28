@@ -181,7 +181,7 @@ export default {
                     redirect: 'follow'
                 };
 
-                fetch(this.BACKEND_URL + "/like/managed-like", requestOptionsRemoveLike)
+                fetch(this.BACKEND_URL + "/like", requestOptionsRemoveLike)
                     .then(response => response.json())
                     .then(result => {
                         this.fetchUserData();
@@ -196,7 +196,7 @@ export default {
                     redirect: 'follow'
                 };
 
-                fetch(this.BACKEND_URL + "/like/managed-like", requestOptionsAddLike)
+                fetch(this.BACKEND_URL + "/like", requestOptionsAddLike)
                     .then(response => response.json())
                     .then(result => {
                         this.fetchUserData();
