@@ -123,7 +123,7 @@ export default {
                 headers: myHeaders,
                 redirect: 'follow',
             };
-            fetch(this.BACKEND_URL + "/tag/managed-tags", requestOptions)
+            fetch(this.BACKEND_URL + "/tag", requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     this.existingTags = result;
@@ -147,7 +147,7 @@ export default {
                 body: raw,
                 redirect: 'follow',
             };
-            fetch(this.BACKEND_URL + "/tag/managed-tags", requestOptions)
+            fetch(this.BACKEND_URL + "/tag", requestOptions)
                 .then(response => response.json())
                 .then(result => {
                     this.newTagName = "";
